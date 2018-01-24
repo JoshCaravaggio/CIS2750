@@ -1,4 +1,5 @@
 #include "LinkedListAPI.h"
+#include "assert.h"
 
 /** Function to initialize the list metadata head to the appropriate function pointers. Allocates memory to the struct.
 *@return pointer to the list head
@@ -6,7 +7,8 @@
 *@param deleteFunction function pointer to delete a single piece of data from the list
 *@param compareFunction function pointer to compare two nodes of the list in order to test for equality or order
 **/
-List initializeList(char* (*printFunction)(void* toBePrinted),void (*deleteFunction)(void* toBeDeleted),int (*compareFunction)(const void* first,const void* second)){
+List initializeList(
+char* (*printFunction)(void* toBePrinted),void (*deleteFunction)(void* toBeDeleted),int (*compareFunction)(const void* first,const void* second)){
 	List tmpList;
 	
     //Asserts create a partial function...
@@ -95,10 +97,12 @@ void insertBack(List* list, void* toBeAdded){
     if (list->head == NULL && list->tail == NULL){
         list->head = newNode;
         list->tail = list->head;
+    	list->length = list->length+1;        
     }else{
 		newNode->previous = list->tail;
         list->tail->next = newNode;
     	list->tail = newNode;
+    	list->length = list->length+1;
     }
 	
 }
@@ -119,10 +123,12 @@ void insertFront(List* list, void* toBeAdded){
     if (list->head == NULL && list->tail == NULL){
         list->head = newNode;
         list->tail = list->head;
+     	list->length = list->length+1;       
     }else{
 		newNode->next = list->head;
         list->head->previous = newNode;
     	list->head = newNode;
+     	list->length = list->length+1;   	
     }
 }
 
@@ -181,7 +187,7 @@ void* deleteDataFromList(List* list, void* toBeDeleted){
 			
 			void* data = delNode->data;
 			free(delNode);
-			
+			list->length = list->length-1; 
 			return data;
 			
 		}else{
@@ -281,9 +287,6 @@ char* toString(List list){
 ListIterator createIterator(List list){
     ListIterator iter;
 
-    //Assert creates a partial function...
-    assert (list != NULL);
-	
     iter.current = list.head;
     
     return iter;
@@ -299,4 +302,47 @@ void* nextElement(ListIterator* iter){
         return NULL;
     }
 }
+/**Returns the number of elements in the list.
+ *@pre List must exist, but does not have to have elements.
+ *@param list - the list struct.
+ *@return on success: number of eleemnts in the list (0 or more).  on failure: -1 (e.g. list not initlized correctly)
+ **/
+int getLength(List list){
+	
+	if(list.length < 0){
+		return -1;
+	}else{
+		return list.length;
+	}	
+	
+}
 
+/** Function that searches for an element in the list using a comparator function.
+ * If an element is found, a pointer to the data of that element is returned
+ * Returns NULL if the element is not found.
+ *@pre List exists and is valid.  Comparator function has been provided.
+ *@post List remains unchanged.
+ *@return The data associated with the list element that matches the search criteria.  If element is not found, return NULL.
+ *@param list - a list sruct
+ *@param customCompare - a pointer to comparator fuction for customizing the search
+ *@param searchRecord - a pointer to search data, which contains seach criteria
+ *Note: while the arguments of compare() and searchRecord are all void, it is assumed that records they point to are
+ *      all of the same type - just like arguments to the compare() function in the List struct
+ **/
+void* findElement(List list, bool (*customCompare)(const void* first,const void* second), const void* searchRecord){
+	
+	if(list.length ==0){
+		return NULL;
+	}
+	
+	ListIterator iter = createIterator(list);
+	void* elem;
+	
+	while((elem = nextElement(&iter)) != NULL){
+		if(customCompare(searchRecord, elem)==true){
+				return elem;
+		}
+	}
+	return NULL;
+
+}

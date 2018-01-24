@@ -11,6 +11,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <assert.h>
 
 /**
  * Node of a linked list. This list is doubly linked, meaning that it has points to both the node immediately in front 
@@ -31,6 +32,7 @@ typedef struct listNode{
 typedef struct listHead{
     Node* head;
     Node* tail;
+    int length;
     void (*deleteData)(void* toBeDeleted);
     int (*compare)(const void* first,const void* second);
     char* (*printData)(void* toBePrinted);
