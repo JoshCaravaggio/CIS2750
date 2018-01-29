@@ -9,13 +9,15 @@ TEST = $(BIN)test
 
 all: test
 
-test:  LinkedListAPI.o GEDCOMparser.o test.o
-	$(CC) $(OBJ)LinkedListAPI.o $(OBJ)GEDCOMparser.o $(OBJ)test.o  -o $(TEST)
+test:  LinkedListAPI.o GEDCOMparser.o GEDCOMutilities.o test.o
+	$(CC) $(OBJ)LinkedListAPI.o $(OBJ)GEDCOMparser.o $(OBJ)GEDCOMutilities.o $(OBJ)test.o  -o $(TEST)
 
 LinkedListAPI.o:
 	$(CC) $(CLFAGS) $(INCLUDE) -c $(SRC)LinkedListAPI.c -o $(OBJ)LinkedListAPI.o
 GEDCOMparser.o:
 	$(CC) $(CLFAGS) $(INCLUDE) -c $(SRC)GEDCOMparser.c -o $(OBJ)GEDCOMparser.o
+GEDCOMutilities.o:
+	$(CC) $(CLFAGS) $(INCLUDE) -c $(SRC)GEDCOMutilities.c -o $(OBJ)GEDCOMutilities.o	
 test.o:
 	$(CC) $(CLFAGS) $(INCLUDE) -c $(SRC)test.c -o $(OBJ)test.o
 
