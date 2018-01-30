@@ -21,7 +21,7 @@ GEDCOMerror createGEDCOM(char* fileName, GEDCOMobject** obj){
 	char * tempLine = malloc(sizeof(char)*256);
 	GEDCOMerror error;
 	GEDCOMLine ** fileLines = malloc(sizeof(GEDCOMLine*));
-	GEDCOMLine ** currentRecord =malloc(sizeof(GEDCOMLine*));
+	GEDCOMLine ** currentRecord = malloc(sizeof(GEDCOMLine*));
 
 	int currenLevel = 0;
 	char* token;
@@ -32,14 +32,18 @@ GEDCOMerror createGEDCOM(char* fileName, GEDCOMobject** obj){
 	int recordCounter = 0;
 	int numberOfRecords = 0;
 	int currentRecordStart = 0;
+	Header* header  = NULL;
+	Submitter* submitter = NULL;
 	bool newRecord = false;
 	bool headFound = false;
 	bool trlrFound = false;		
-	bool errorFound = false;		
+	bool errorFound = false;
+			
 		
 
-	while(fgets(tempLine,256,fp)!=NULL){
-	
+	while(getLine(tempLine,256,fp)!=NULL){
+		
+		//printf("Read in: %s", tempLine);
 		if(strcmp(tempLine,"\n")==0){
 			error.line = lineCounter;
 			error.type = INV_RECORD;
@@ -75,6 +79,7 @@ GEDCOMerror createGEDCOM(char* fileName, GEDCOMobject** obj){
 			}else{
 				
 				k = 0;
+				
 				for(j = currentRecordStart; j <= (currentRecordStart + recordCounter);j++){
 					
 					currentRecord = realloc(currentRecord, sizeof(GEDCOMLine*) *(k+1));
@@ -84,19 +89,74 @@ GEDCOMerror createGEDCOM(char* fileName, GEDCOMobject** obj){
 				}
 				
 				if(strcmp(currentRecord[0]->tag, "HEAD")==0){
-					appender(currentRecord,k);
-					Header* header = createHeader(currentRecord, k);
-					
+				
+					appender(currentRecord,k);						
+					header = createHeader(currentRecord, k);
+
+					if(strcmp(header->source, "ERROR")==0){
+						error.line = header->gedcVersion;
+						error.type =INV_HEADER;
+											
+						printf("%s %f\n", header->source, header->gedcVersion);
+				
+						for(i = 0; i<lineCounter; i++){
+							deleteGEDCOMLine(fileLines[i]);
+						}
+						if(submitter!=NULL){
+							clearList(&(submitter->otherFields));
+							free(submitter);							
+							
+						}
+						free(header);
+						free(fileLines);
+						free(tempLine);		
+						free(currentRecord);
+						fclose(fp);
+						return error;		
+					}
+
+					clearList(&(header->otherFields));
+					free(header);				
 				}	
 				
+				if(currentRecord[0]->ref_ID != NULL && strcmp(currentRecord[0]->tag, "SUBM")==0){
+				
+					appender(currentRecord,k);						
+					submitter = createSubmitter(currentRecord, k);
+					if(!(strcmp(submitter->submitterName, "noName")==0)){
+						if(strcmp(submitter->submitterName, "ERROR")==0){
+							error.line = atoi(submitter->address);
+							error.type = INV_RECORD;
+							
+																
+							for(i = 0; i<lineCounter; i++){
+								deleteGEDCOMLine(fileLines[i]);
+							}
+							//if(header!=NULL){
+							//	clearList(&(header->otherFields));
+							//	free(header);
+							//}
+							free(submitter);
+							free(fileLines);
+							free(tempLine);		
+							free(currentRecord);
+							fclose(fp);
+							return error;		
+						}
+					}
+
+					clearList(&(submitter->otherFields));
+					free(submitter);
+								
+				}						
+						
 				k = 0;
 				recordCounter = 0;
 				numberOfRecords++;
 				currentRecordStart = lineCounter-1;			
 				
 			}
-		
-							
+									
 		}		
 				
 		if(strcmp(fileLines[lineCounter-1]->tag,"HEAD")==0){
@@ -107,7 +167,9 @@ GEDCOMerror createGEDCOM(char* fileName, GEDCOMobject** obj){
 			trlrFound = true;
 		}			
 		
+		
 	}
+	
 	/**printf("Line %d --", j);
 	printf(" Level : %d", fileLines[lineCounter]->level);
 	printf(" XRef ID : %s", fileLines[lineCounter]->ref_ID);				
@@ -139,8 +201,7 @@ GEDCOMerror createGEDCOM(char* fileName, GEDCOMobject** obj){
 	for(i = 0; i<lineCounter; i++){
 		deleteGEDCOMLine(fileLines[i]);
 	}
-	
-	
+		
 	free(fileLines);
 	free(tempLine);		
 	free(currentRecord);

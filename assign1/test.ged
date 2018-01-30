@@ -1,11 +1,16 @@
 0 HEAD
-1 SOUR webtreeprint.com
-2 VERS 1.0
-2 NAME webtreeprint
-2 FILE shakespeare.ged
+1 SOUR PAF
+2 NAME Personal Ancestral File
+2 VERS 5.0
+1 DATE 30 NOV 2000
 1 GEDC
-2 VERS 5.5.1
+2 VERS 5.5
 2 FORM LINEAGE-LINKED
-1 CHAR UTF-8
-1 SUBM @SUB1@
+1 CHAR ANSEL
+1 SUBM @U1@
+0 @5@ SUBM
+1 NAME Reldon /Poulson/
+1 ADDR 1900 43rd Street West
+2 CONT Billings, MT 68051
+1 PHON (406) 555-1232
 0 TRLR

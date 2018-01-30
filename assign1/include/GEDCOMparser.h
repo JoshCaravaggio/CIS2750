@@ -77,6 +77,7 @@ typedef struct {
     
 } Header;
 
+
 //Represends GEDCOM individual record
 typedef struct {
     
@@ -107,6 +108,8 @@ typedef struct {
     
     //List of child references.  All objects in the list will be of type Individual.  It may be empty.
     List        children;
+    
+    List 		events;
     
     //List of other fields in the family record.  All objects in the list will be of type Field.  It may be empty.
     List        otherFields;

@@ -8,8 +8,8 @@
 #include <ctype.h>
 #include "LinkedListAPI.h"
 #include "GEDCOMparser.h"
-
 #
+
 //Represents a single line of a GEDCOM file
 typedef struct {
 	
@@ -118,6 +118,14 @@ GEDCOMLine* copyGEDCOMLine(void * toBeCopied);
  *@param number of lines in the array 
  **/
 Header* createHeader(GEDCOMLine ** headerRecord, int numLines);
+/** Function to parse an array of GEDCOMLines for information to construct a Submitter object with
+ *@pre GEDCOM Line array must exist
+ *@post new Submitter structure will be returned
+ *@return Submitter structure
+ *@param pointer to array of GEDCOM Line pointers
+ *@param number of lines in the array 
+ **/
+Submitter* createSubmitter(GEDCOMLine ** headerRecord, int numLines);
 /** Function to parse an array of GEDCOMLines and concatenate lines tagged to do so
  *@pre GEDCOM Line array must exist
  *@post lines with CONC and CONT tags will be respectively processed
@@ -142,8 +150,13 @@ CharSet decodeCharSet(char* toBeConverted);
 bool validateHeaderTag(char* toValidate);
 
 
-
+/** Function to handle parsing and allocation of a  
+ *@pre line must be allocated
+ *@post return a field object with the data that the line contained
+ *@return Field object
+ *@param GEDCOMLine object to be parsed
+ **/
 Field* createField(GEDCOMLine* line);
-
+char * getLine(char *dst, int max, FILE *fp);
 
 #endif

@@ -137,7 +137,7 @@ GEDCOMLine* convertStringToGEDCOMLine(char* toConvert, int lineNum){
 	token = strtok(toConvert," \r\n");
 	
 	
-	//Make sure the level token is valid
+	
 	if(validateLevel(token, level)){
 		level = atoi(token);	
 		line->level = level;		
@@ -148,24 +148,24 @@ GEDCOMLine* convertStringToGEDCOMLine(char* toConvert, int lineNum){
 		
 	token = strtok(NULL," \r\n");
 	
-	//Ensure there is another token after the level		
+	
 	if(token==NULL){
 		return(line);
 	}
 	
 	
-	//Course of action for LEVEL-REF_ID-TAG line format
+
 	if(token[0]=='@'){
 		
 		
-		//Ensuring reference ID is valid
+	
 		if(validateReferenceID(token)){
 			line->ref_ID = malloc(sizeof(char)*22);
 			strcpy(line->ref_ID, token);		
 		}
 		 
 		token = strtok(NULL,"\r\n");
-		//Ensuring tag is valid
+	
 		if(validateTag(token)){
 			line->tag = malloc(sizeof(char)*31);
 			for(i = 0; i<strlen(token);i++){
@@ -175,9 +175,8 @@ GEDCOMLine* convertStringToGEDCOMLine(char* toConvert, int lineNum){
 
 		}
 			
-	// Course of aciton for LEVEL-TAG-Value line format	
 	}else{		
-		//Ensuring tag is valid		
+		
 		if(validateTag(token)){
 			for(i = 0; i<strlen(token);i++){
 				toupper(token[i]);
@@ -186,7 +185,6 @@ GEDCOMLine* convertStringToGEDCOMLine(char* toConvert, int lineNum){
 			strcpy(line->tag, token);
 		}
 		
-		//Getting remainder of line for valid, whether empty or not
 		token = strtok(NULL,"\r\n");
 		if(token != NULL){
 			line->value = malloc(sizeof(char)*255);
@@ -264,6 +262,7 @@ void deleteGEDCOMLine(void * toBeDeleted){
 	if(toDelete == NULL){
 		return;
 	}
+	
 	if((toDelete->ref_ID) != NULL){
 		free(toDelete->ref_ID);
 	}
@@ -281,92 +280,101 @@ void deleteGEDCOMLine(void * toBeDeleted){
 }
 
 
-GEDCOMLine* copyGEDCOMLine(void * toBeCopied){
-
-	GEDCOMLine * source = (GEDCOMLine*)toBeCopied;
-	GEDCOMLine* copy = malloc(sizeof(GEDCOMLine));
-	copy->tag = NULL;
-	copy->ref_ID = NULL;
-	copy->value = NULL;
-	
-	
-	if(source == NULL){
-		return NULL;
-	}
-	copy->level = source->level;
-	
-	if(source->ref_ID!=NULL){
-		copy->ref_ID = malloc(sizeof(char)*22);
-		strcpy(copy->ref_ID,source->ref_ID);
-		
-	}
-	if(source->tag!=NULL){
-		copy->tag = malloc(sizeof(char)*31);
-		strcpy(copy->tag,source->tag);
-		
-	}
-	if(source->value!=NULL){
-		copy->value = malloc(sizeof(char)*255);
-		strcpy(copy->value,source->value);
-	}		
-	return copy;
-	
-}
-
 Header* createHeader(GEDCOMLine ** record, int numLines){
 	
 	Header* header = malloc(sizeof(Header));
+	header->submitter = NULL;
+	
 	int i = 0;
 	int j = 0;
 	float version =  0;	
 	bool sourFound = false;
 	bool versionFound = false;
 	bool charsetFound = false;
-	int errorLine;
+	bool submitterFound = false;
+	
 	header->otherFields = initializeList(printField, deleteField, compareFields);
 	
-	
+
 	for(i = 0; i< numLines; i++){
-		if(strcmp(record[i]->tag, "SOUR")==0){
+
+		if((record[i]->level == -1 )||(record[i]->tag == NULL)){
+			printf("Invalid level or tag\n");
+			clearList(&(header->otherFields));
+			strcpy(header->source, "ERROR");
+			header->gedcVersion = record[i]->lineNum;	
+			return header;
+						
+		}else if(strcmp(record[i]->tag, "SOUR")==0){
 			sourFound = true;
 			if(record[i]->value == NULL){
-				errorLine = record[i]->lineNum;	
-			}else{
-				
-				for(j = 0; j<strlen(record[i]->value);j++){
-					header->source[j] = record[i]->value[j];
-				}
+				printf("Invalid source value\n");				
+				clearList(&(header->otherFields));
+				strcpy(header->source, "ERROR");
+				header->gedcVersion = record[i]->lineNum;	
+				return header;	
+			
+			}else{			
+
+				strcpy(header->source, record[i]->value);		
 
 			}
 	
-		}else if((strcmp(record[i]->tag, "VERS")==0) && (strcmp(record[i-1]->tag, "GEDC")==0 ||strcmp(record[i-2]->tag, "GEDC")==0)){
-				versionFound = true;
-				if(record[i]->value == NULL){
-					errorLine = record[i]->lineNum;						
-				}else{
-					header->gedcVersion = atof(record[i]->value); 				
-				}
+		}else if((strcmp(record[i]->tag, "VERS")==0) ){
+			
+			if(!(i==0 || i==1)){
+				if((strcmp(record[i-1]->tag, "GEDC")==0 ||strcmp(record[i-2]->tag, "GEDC")==0)){
+					versionFound = true;
 				
+					if(record[i]->value == NULL){
+						printf("Invalid gedcom version\n");					
+						clearList(&(header->otherFields));
+						strcpy(header->source, "ERROR");
+						header->gedcVersion = record[i]->lineNum;	
+						return header;							
+					}else{
+					
+						header->gedcVersion = atof(record[i]->value); 				
+					}
+				}
+			}
 		}else if(strcmp(record[i]->tag, "CHAR")==0){
 			charsetFound = true;
-			if(record[i]->value == NULL){
-				errorLine = record[i]->lineNum;						
+			if(record[i]->value == NULL){			
+				printf("Invalid charset\n");		
+				clearList(&(header->otherFields));
+				strcpy(header->source, "ERROR");
+				header->gedcVersion = record[i]->lineNum;	
+				return header;						
 			}else{
 				header->encoding = decodeCharSet(record[i]->value);
-				if (header->encoding = -1){
-					errorLine = record[i]->lineNum;
+				if (header->encoding == -1){			
+					printf("Invalid encoding\n");
+					clearList(&(header->otherFields));
+					strcpy(header->source, "ERROR");
+					header->gedcVersion = record[i]->lineNum;	
+					return header;	
 				}	
 			}				
-		}else if(validateHeaderTag(record[i]->tag)){
-			insertSorted(&(header->otherFields), createField(record[i]));
-						
+		}else if(strcmp(record[i]->tag, "SUBM")==0){
+			submitterFound = true;
+			if(record[i]->value == NULL){			
+				printf("Invalid submitter value\n");
+				clearList(&(header->otherFields));
+				strcpy(header->source, "ERROR");
+				header->gedcVersion = record[i]->lineNum;	
+				return header;					
+				
+			}
 		}else if(!(strcmp(record[i]->tag,"CONC")==0)||!(strcmp(record[i]->tag,"CONT")==0)){
-			errorLine = record[i]->lineNum;
 			
-		}				
+			insertSorted(&(header->otherFields), createField(record[i]));
+			
+		}
 		
 	}
-	Node * ptr;
+		
+	/**Node * ptr;
 	ptr = (header->otherFields).head;
 	char* tempString;
 	printf("Other Fields\n");
@@ -376,10 +384,18 @@ Header* createHeader(GEDCOMLine ** record, int numLines){
 		free(tempString);
 		ptr = ptr->next;
 	}
-	clearList(&(header->otherFields));
-	free(header);
+	**/
 	
-	return NULL;
+	if(sourFound == false || versionFound == false || charsetFound == false || submitterFound == false){
+		
+		printf("Invalid header\n");
+		clearList(&(header->otherFields));
+		strcpy(header->source, "ERROR");
+		header->gedcVersion = -1;	
+		return header;					
+		
+	}
+	return header;
 		
 }
 
@@ -388,28 +404,27 @@ void appender(GEDCOMLine ** record, int numLines){
 	int sourceLength = 0;
 	int i = 0;
 	
-	for(i = (numLines-1); i>= 0; i--){
+	for(i = (numLines-1); i> 0; i--){
 		if(strcmp(record[i]->tag, "CONC")==0){
 			
 			destLength = strlen(record[i-1]->value);
-			sourceLength = strlen(record[i]->value);						
-			record[i-1]->value = realloc(record[i-1]->value, sizeof(char) * 500);
-			record[i-1]->value[destLength] = ' ';
+			sourceLength = strlen(record[i]->value);														
+			record[i-1]->value = realloc(record[i-1]->value, sizeof(char) * (destLength + sourceLength+2));		
+			strcat(record[i-1]->value, " ");			
 			strcat(record[i-1]->value, record[i]->value);
 			destLength = 0;
 			sourceLength = 0;
 				
 		}else if(strcmp(record[i]->tag, "CONT")==0){
-
+						
 			destLength = strlen(record[i-1]->value);
-			sourceLength = strlen(record[i]->value);						
-			record[i-1]->value = realloc(record[i-1]->value, sizeof(char) * 500);
-			record[i-1]->value[destLength] = '\n';			
-			strcat(record[i-1]->value, record[i]->value);
+			sourceLength = strlen(record[i]->value);				
+			record[i-1]->value = realloc(record[i-1]->value, sizeof(char) * (destLength + sourceLength+2));
+			strcat(record[i-1]->value, "\n");			
+			strcat(record[i-1]->value, record[i]->value);		
 			destLength = 0;
 			sourceLength = 0;
-				
-				
+								
 		}			
 	}
 		
@@ -423,7 +438,7 @@ CharSet decodeCharSet(char* toBeConverted){
 		return ANSEL;	
 			
 	}else if(strcmp(toBeConverted,"UTF-8")==0){
-		
+	
 		return UTF8;
 		
 	}else if(strcmp(toBeConverted,"UNICODE")==0){
@@ -441,58 +456,12 @@ CharSet decodeCharSet(char* toBeConverted){
 }
 
 
-bool validateHeaderTag(char* toValidate){
-	
-	if(strcmp(toValidate,"HEAD")==0){
-		return true;	
-	}else if(strcmp(toValidate,"SOUR")==0){
-		return true;
-	}else if(strcmp(toValidate,"NAME")==0){
-		return true;
-	}else if(strcmp(toValidate,"VERS")==0){
-		return true;
-	}else if(strcmp(toValidate,"CORP")==0){
-		return true;
-	}else if(strcmp(toValidate,"DATA")==0){
-		return true;
-	}else if(strcmp(toValidate,"DATE")==0){
-		return true;
-	}else if(strcmp(toValidate,"COPR")==0){
-		return true;
-	}else if(strcmp(toValidate,"DEST")==0){
-		return true;
-	}else if(strcmp(toValidate,"TIME")==0){
-		return true;
-	}else if(strcmp(toValidate,"SUBM")==0){
-		return true;
-	}else if(strcmp(toValidate,"SUBN")==0){
-		return true;
-	}else if(strcmp(toValidate,"FILE")==0){
-		return true;
-	}else if(strcmp(toValidate,"GEDC")==0){
-		return true;
-	}else if(strcmp(toValidate,"FORM")==0){
-		return true;
-	}else if(strcmp(toValidate,"CHAR")==0){
-		return true;
-	}else if(strcmp(toValidate,"LANG")==0){
-		return true;
-	}else if(strcmp(toValidate,"PLAC")==0){
-		return true;
-	}else if(strcmp(toValidate,"NOTE")==0){
-		return true;
-	}else{
-		return false;
-	}
-	
-}
 
 Field *createField(GEDCOMLine* line){
 	Field *newField = malloc(sizeof(Field));
 	newField->tag = NULL;
 	newField->value = NULL;
 	
-	//printf("Tag: %s Value: %s\n", line->tag, line->value);
 	if(line->tag !=NULL){
 		newField->tag = malloc(sizeof(char) * 5);
 		strcpy(newField->tag, line->tag);		
@@ -503,4 +472,102 @@ Field *createField(GEDCOMLine* line){
 	}
 	
 	return newField;
+}
+Submitter* createSubmitter(GEDCOMLine ** record, int numLines){
+
+	Submitter* submitter = malloc(sizeof(Submitter) + 5 * sizeof(char));
+	strcpy(submitter->submitterName,"");
+	
+	int i = 0;
+	int j = 0;
+	bool nameFound = false;
+	submitter->otherFields = initializeList(printField, deleteField, compareFields);
+	
+
+	for(i = 0; i< numLines; i++){
+		
+		
+		if((record[i]->level == -1 )||(record[i]->tag == NULL)){
+			printf("Invalid level or tag\n");
+			clearList(&(submitter->otherFields));
+			sprintf(submitter->submitterName, "ERROR");
+			return submitter;
+						
+		}else if(strcmp(record[i]->tag, "NAME")==0){
+
+			if(record[i]->value == NULL || strlen(record[i]->value) > 60){
+				printf("Invalid name value\n");				
+				clearList(&(submitter->otherFields));
+				sprintf(submitter->submitterName, "ERROR");
+				sprintf(submitter->address, "%d", record[i]->lineNum);
+				return submitter;	
+			
+			}else{			
+				nameFound = true;
+				strcpy(submitter->submitterName, record[i]->value);		
+
+			}
+	
+		}else if((strcmp(record[i]->tag, "ADDR")==0) ){
+							
+			if(record[i]->value == NULL){
+				
+				printf("Invalid address value\n");					
+				clearList(&(submitter->otherFields));
+				sprintf(submitter->submitterName, "ERROR");
+				sprintf(submitter->address, "%d", record[i]->lineNum);
+				return submitter;	
+										
+			}else{
+					
+				submitter = realloc(submitter, sizeof(Submitter) + sizeof(char) * (strlen(record[i]->value)+1));
+				strcpy(submitter->address, record[i]->value);
+				printf("Submitter Address: %s\n", submitter->address);
+						
+			}
+				
+			
+		}else if(!(strcmp(record[i]->tag,"CONC")==0)&&!(strcmp(record[i]->tag,"CONT")==0)){
+			
+			insertSorted(&(submitter->otherFields), createField(record[i]));
+			
+		}	
+	
+	}
+	//printf("Submitter");
+	Node * ptr;
+	ptr = (submitter->otherFields).head;
+	char* tempString;
+	printf("Other Fields\n");
+	
+	while(ptr!=NULL){
+		tempString = printField(ptr->data);
+		printf("%s\n",tempString);
+		free(tempString);
+		ptr = ptr->next;
+	}
+	
+	if(nameFound == false){
+		strcpy(submitter->submitterName, "noName");
+	}	
+	return submitter;
+		
+}
+
+char * getLine(char *destination, int maxLength, FILE *fp){
+	int character;
+	char *ptr;
+
+	for (ptr = destination, maxLength--; maxLength > 0; maxLength--) {
+
+		if ((character = fgetc (fp)) == EOF)break;		
+		*ptr++ = character;
+		if (character== '\r' )break;		
+		if (character == '\n' )break;
+	}
+	*ptr = 0;
+	if (ptr == destination || character == EOF){
+		return NULL;
+	}
+	return (ptr);
 }
