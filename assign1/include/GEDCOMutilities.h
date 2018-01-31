@@ -110,22 +110,30 @@ bool validateTag(char* toValidate);
  *@param void pointer to gedcom line data to be copied
  **/
 GEDCOMLine* copyGEDCOMLine(void * toBeCopied);
-/** Function to parse an array of GEDCOMLines for information to construct a Header object with
+/** Function to parse an array of GEDCOMLines for information to construct a Header object 
  *@pre GEDCOM Line array must exist
  *@post new Header structure will be returned
  *@return Header structure
  *@param pointer to array of GEDCOM Line pointers
  *@param number of lines in the array 
  **/
-Header* createHeader(GEDCOMLine ** headerRecord, int numLines);
-/** Function to parse an array of GEDCOMLines for information to construct a Submitter object with
+Header* createHeader(GEDCOMLine ** record, int numLines);
+/** Function to parse an array of GEDCOMLines for information to construct a Submitter object 
  *@pre GEDCOM Line array must exist
  *@post new Submitter structure will be returned
  *@return Submitter structure
  *@param pointer to array of GEDCOM Line pointers
  *@param number of lines in the array 
  **/
-Submitter* createSubmitter(GEDCOMLine ** headerRecord, int numLines);
+Submitter* createSubmitter(GEDCOMLine ** record, int numLines);
+/** Function to parse an array of GEDCOMLines for information to construct a individual object 
+ *@pre GEDCOM Line array must exist
+ *@post new Individual structure will be returned
+ *@return Individual structure
+ *@param pointer to array of GEDCOM Line pointers
+ *@param number of lines in the array 
+ **/
+Individual* createIndividual(GEDCOMLine ** record, int numLines);
 /** Function to parse an array of GEDCOMLines and concatenate lines tagged to do so
  *@pre GEDCOM Line array must exist
  *@post lines with CONC and CONT tags will be respectively processed
@@ -157,6 +165,22 @@ bool validateHeaderTag(char* toValidate);
  *@param GEDCOMLine object to be parsed
  **/
 Field* createField(GEDCOMLine* line);
-char * getLine(char *dst, int max, FILE *fp);
+/** Function to read a line in from the file, basically fgets with added functionality for carriage returns
+ *@pre  file pointer needs to exist
+ *@post return an charcater array read in from file
+ *@return pointer to character array
+ *@param destination to place the parsed line into
+ *@param maximum number of characters to read in
+ *@param pointer to file stream that is to be read from
+ **/
+char * getLine(char *destination, int maxLength, FILE *fp);
+/** Function to parse an array of GEDCOMLines for information to construct an event object
+ *@pre GEDCOM Line array must exist
+ *@post new Event structure will be returned
+ *@return Event structure
+ *@param pointer to array of GEDCOM Line pointers
+ *@param number of lines in the array 
+ **/
+Event* createEvent(GEDCOMLine ** record, int numLines);
 
 #endif

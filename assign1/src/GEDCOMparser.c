@@ -34,6 +34,14 @@ GEDCOMerror createGEDCOM(char* fileName, GEDCOMobject** obj){
 	int currentRecordStart = 0;
 	Header* header  = NULL;
 	Submitter* submitter = NULL;
+	Individual* tempIndi = NULL;
+	Event* tempEvent;
+	if(obj==NULL){
+		obj = malloc(sizeof(GEDCOMobject**));
+		obj[0] = malloc(sizeof(GEDCOMobject));
+		obj[0]->individuals = initializeList(printIndividual,deleteIndividual,compareIndividuals); 		
+		
+	}
 	bool newRecord = false;
 	bool headFound = false;
 	bool trlrFound = false;		
@@ -43,6 +51,7 @@ GEDCOMerror createGEDCOM(char* fileName, GEDCOMobject** obj){
 
 	while(getLine(tempLine,256,fp)!=NULL){
 		
+	
 		//printf("Read in: %s", tempLine);
 		if(strcmp(tempLine,"\n")==0){
 			error.line = lineCounter;
@@ -51,7 +60,8 @@ GEDCOMerror createGEDCOM(char* fileName, GEDCOMobject** obj){
 			for(i = 0; i<lineCounter; i++){		
 				deleteGEDCOMLine(fileLines[i]);
 			}			
-			
+			free(obj[0]);
+			free(obj);	
 			free(fileLines);
 			free(tempLine);
 			free(currentRecord);
@@ -89,7 +99,7 @@ GEDCOMerror createGEDCOM(char* fileName, GEDCOMobject** obj){
 				}
 				
 				if(strcmp(currentRecord[0]->tag, "HEAD")==0){
-				
+									
 					appender(currentRecord,k);						
 					header = createHeader(currentRecord, k);
 
@@ -107,6 +117,8 @@ GEDCOMerror createGEDCOM(char* fileName, GEDCOMobject** obj){
 							free(submitter);							
 							
 						}
+						free(obj[0]);	
+						free(obj);
 						free(header);
 						free(fileLines);
 						free(tempLine);		
@@ -136,6 +148,8 @@ GEDCOMerror createGEDCOM(char* fileName, GEDCOMobject** obj){
 							//	clearList(&(header->otherFields));
 							//	free(header);
 							//}
+							free(obj[0]);
+							free(obj);
 							free(submitter);
 							free(fileLines);
 							free(tempLine);		
@@ -148,7 +162,58 @@ GEDCOMerror createGEDCOM(char* fileName, GEDCOMobject** obj){
 					clearList(&(submitter->otherFields));
 					free(submitter);
 								
-				}						
+				}
+				
+				if(currentRecord[0]->ref_ID != NULL && strcmp(currentRecord[0]->tag, "INDI")==0){
+				
+					appender(currentRecord,k);
+					tempIndi = createIndividual(currentRecord, k);						
+					//insertSorted(obj[0]->individuals, createIndividual(currentRecord, k));
+					
+					if(strcmp(tempIndi->givenName, "ERROR")==0){
+						error.line = atoi(tempIndi->surname);
+						error.type = INV_RECORD;
+							
+																
+						for(i = 0; i<lineCounter; i++){
+							deleteGEDCOMLine(fileLines[i]);
+						}
+						//if(header!=NULL){
+						//	clearList(&(header->otherFields));
+						//	free(header);
+						//}
+						free(tempIndi);
+						free(obj[0]);
+						free(obj);
+						free(fileLines);
+						free(tempLine);		
+						free(currentRecord);
+						fclose(fp);
+						return error;		
+					}
+			
+					
+					//printf("Individual: %s %s\n", tempIndi->givenName, tempIndi->surname);
+					clearList(&(tempIndi->otherFields));					
+					//clearList(&(tempIndi->events));	
+					
+					Node * ptr;
+					ptr = (tempIndi->events).head;
+				
+	
+					while(ptr!=NULL){
+						tempEvent = (Event*)(ptr->data);
+						clearList(&(tempEvent->otherFields));
+						ptr = ptr->next;
+					}
+					
+					clearList(&(tempIndi->events));	
+					free(tempIndi->givenName);
+					free(tempIndi->surname);									
+					free(tempIndi);
+					
+								
+				}										
 						
 				k = 0;
 				recordCounter = 0;
@@ -183,7 +248,8 @@ GEDCOMerror createGEDCOM(char* fileName, GEDCOMobject** obj){
 		for(i = 0; i<lineCounter; i++){		
 			deleteGEDCOMLine(fileLines[i]);
 		}			
-			
+		free(obj[0]);		
+		free(obj);		
 		free(fileLines);
 		free(tempLine);
 		free(currentRecord);
@@ -201,7 +267,8 @@ GEDCOMerror createGEDCOM(char* fileName, GEDCOMobject** obj){
 	for(i = 0; i<lineCounter; i++){
 		deleteGEDCOMLine(fileLines[i]);
 	}
-		
+	free(obj[0]);	
+	free(obj);	
 	free(fileLines);
 	free(tempLine);		
 	free(currentRecord);
@@ -349,8 +416,7 @@ char* printIndividual(void* toBePrinted){
 void deleteFamily(void* toBeDeleted){
 	
 	Family* toDelete = (Family*)toBeDeleted;
-	
-	
+		
 	if(toDelete==NULL){
 		return; 
 	}else{

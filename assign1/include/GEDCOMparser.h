@@ -19,6 +19,7 @@ typedef enum eCode {OK, INV_FILE, INV_GEDCOM, INV_HEADER, INV_RECORD, OTHER} Err
 
 //Represents a generic event, e.g. individual event, family event, etc.
 typedef struct {
+	
     //The max length of this field is known from the GEDCOM spec, so we can use a statically allocated array
     char type[5];
     

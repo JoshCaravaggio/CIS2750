@@ -50,8 +50,8 @@ void freeFamily(void* toBeFreed){
 void freeEvent(void* toBeFreed){
 	//Find out what to do if the tag or value is NULL
 	Event* toFree = (Event*)(toBeFreed);
-	free(toFree->date);
-	free(toFree->place);
+	if(toFree->date!=NULL)free(toFree->date);
+	if(toFree->place!=NULL)free(toFree->place);	
 	free(toFree);
 	return;
 }
@@ -477,7 +477,8 @@ Submitter* createSubmitter(GEDCOMLine ** record, int numLines){
 
 	Submitter* submitter = malloc(sizeof(Submitter) + 5 * sizeof(char));
 	strcpy(submitter->submitterName,"");
-	
+	strcpy(submitter->address,"");
+		
 	int i = 0;
 	int j = 0;
 	bool nameFound = false;
@@ -522,19 +523,19 @@ Submitter* createSubmitter(GEDCOMLine ** record, int numLines){
 					
 				submitter = realloc(submitter, sizeof(Submitter) + sizeof(char) * (strlen(record[i]->value)+1));
 				strcpy(submitter->address, record[i]->value);
-				printf("Submitter Address: %s\n", submitter->address);
+				//printf("Submitter Address: %s\n", submitter->address);
 						
 			}
 				
 			
-		}else if(!(strcmp(record[i]->tag,"CONC")==0)&&!(strcmp(record[i]->tag,"CONT")==0)){
+		}else if(!(strcmp(record[i]->tag,"CONC")==0)&& i!=0 &&!(strcmp(record[i]->tag,"CONT")==0)){
 			
 			insertSorted(&(submitter->otherFields), createField(record[i]));
 			
 		}	
 	
 	}
-	//printf("Submitter");
+	/**printf("Submitter");
 	Node * ptr;
 	ptr = (submitter->otherFields).head;
 	char* tempString;
@@ -546,10 +547,8 @@ Submitter* createSubmitter(GEDCOMLine ** record, int numLines){
 		free(tempString);
 		ptr = ptr->next;
 	}
-	
-	if(nameFound == false){
-		strcpy(submitter->submitterName, "noName");
-	}	
+	**/
+
 	return submitter;
 		
 }
@@ -570,4 +569,205 @@ char * getLine(char *destination, int maxLength, FILE *fp){
 		return NULL;
 	}
 	return (ptr);
+}
+Individual* createIndividual(GEDCOMLine ** record, int numLines){
+
+	Individual* individual = malloc(sizeof(Individual));
+	GEDCOMLine ** currentEvent = malloc(sizeof(GEDCOMLine*));
+	
+	individual->givenName = malloc(sizeof(char)*120);
+	individual->surname = malloc(sizeof(char)*120);	
+	strcpy(individual->givenName, "");
+	strcpy(individual->surname, "");
+	individual->events = initializeList(printEvent, deleteEvent, compareEvents);
+	individual->otherFields = initializeList(printField, deleteField, compareFields);	
+	
+	Event * tempEvent;		
+	char* token;	
+	int i = 0;
+	int j = 0;
+	int k = 0;
+	int eventCounter= 0;
+	
+	bool nameFound = false;
+
+	for(i = 0; i< numLines; i++){
+								
+		
+		if((record[i]->level == -1 )||(record[i]->tag == NULL)){
+			
+			printf("Invalid level or tag\n");
+			clearList(&(individual->otherFields));
+			clearList(&(individual->events));	
+			sprintf(individual->givenName, "ERROR");
+			sprintf(individual->surname, "%d", record[i]);			
+			return individual;
+								
+		}else if(strcmp(record[i]->tag, "NAME")==0){
+
+			if(record[i]->value == NULL ){
+				strcpy(individual->givenName, "");				
+				strcpy(individual->surname, "");				
+			
+			}else{							
+				token = strtok(record[i]->value,"/");	
+				if(token!=NULL){
+					strcpy(individual->givenName, token);	
+				}										
+				strcpy(individual->givenName, token);		
+				token = strtok(NULL, "/");
+				if(token!=NULL){
+					strcpy(individual->surname, token);	
+				}
+			}
+	
+		}else if(record[i]->level == 1 && record[i]->value == NULL && !(strcmp(record[i]->tag, "SEX")==0) ){
+			k = i + 1;
+			
+			while(record[k]->level==2){
+				eventCounter++;
+				currentEvent = realloc(currentEvent, sizeof(GEDCOMLine*) * (eventCounter+1));
+				memcpy(&currentEvent[eventCounter-1], &record[k], sizeof(GEDCOMLine*));
+							
+				k++;
+			}
+			eventCounter = 0;
+			tempEvent = createEvent(currentEvent, eventCounter);
+			strcpy(tempEvent->type, record[i]->tag);
+			if(strcmp(tempEvent->date, "ERROR")==0){
+										
+				printf("Type: %s Date: %s Place: %s\n", tempEvent->type, tempEvent->date, tempEvent->place);	
+				
+				printf("Invalid Event\n");
+				clearList(&(individual->otherFields));
+				clearList(&(individual->events));
+					
+				sprintf(individual->givenName, "ERROR");
+				sprintf(individual->surname, "%d", atoi(tempEvent->place));												
+				free(tempEvent->date);
+				free(tempEvent->place);
+				clearList(&(tempEvent->otherFields));
+				free(tempEvent);
+				return individual;				
+			}else{
+										
+				//insertSorted(&(individual->events),tempEvent);
+				//tempEvent = NULL;								
+			}		
+		}/**else if(!(strcmp(record[i]->tag,"CONC")==0)&& i!=0 &&!(strcmp(record[i]->tag,"CONT")==0)){
+			
+			insertSorted(&(submitter->otherFields), createField(record[i]));
+			
+		}**/	
+	
+	}
+	/**printf("Submitter");
+	Node * ptr;
+	ptr = (submitter->otherFields).head;
+	char* tempString;
+	printf("Other Fields\n");
+	
+	while(ptr!=NULL){
+		tempString = printField(ptr->data);
+		printf("%s\n",tempString);
+		free(tempString);
+		ptr = ptr->next;
+	}
+	**/
+	free(currentEvent);
+	return individual;
+		
+}
+Event* createEvent(GEDCOMLine ** record, int numLines){
+	
+	Event* event = malloc(sizeof(Event));
+	
+	event->date = malloc(sizeof(char)*120);
+	event->place = malloc(sizeof(char)*120);	
+	strcpy(event->date,"");
+	strcpy(event->place,"");
+	strcpy(event->type," ");
+				
+	int i = 0;
+	int j = 0;
+
+	event->otherFields = initializeList(printField, deleteField, compareFields);
+	
+	
+	for(i = 0; i< numLines; i++){
+
+		
+		if((record[i]->level == -1 )||(record[i]->tag == NULL)){
+			printf("Invalid level or tag\n");
+			clearList(&(event->otherFields));
+			sprintf(event->date, "ERROR");
+			sprintf(event->place, "%d", record[i]->lineNum);			
+			return event;
+						
+		}/**else if(strcmp(record[i]->tag, "NAME")==0){
+
+			if(record[i]->value == NULL || strlen(record[i]->value) > 60){
+				printf("Invalid name value\n");				
+				clearList(&(submitter->otherFields));
+				sprintf(submitter->submitterName, "ERROR");
+				sprintf(submitter->address, "%d", record[i]->lineNum);
+				return submitter;	
+			
+			}else{			
+				nameFound = true;
+				strcpy(submitter->submitterName, record[i]->value);		
+
+			}
+	
+		}else if((strcmp(record[i]->tag, "ADDR")==0) ){
+							
+			if(record[i]->value == NULL){
+				
+				printf("Invalid address value\n");					
+				clearList(&(submitter->otherFields));
+				sprintf(submitter->submitterName, "ERROR");
+				sprintf(submitter->address, "%d", record[i]->lineNum);
+				return submitter;	
+										
+			}else{
+					
+				submitter = realloc(submitter, sizeof(Submitter) + sizeof(char) * (strlen(record[i]->value)+1));
+				strcpy(submitter->address, record[i]->value);
+				//printf("Submitter Address: %s\n", submitter->address);
+						
+			}
+				
+			
+		}else if(!(strcmp(record[i]->tag,"CONC")==0)&& i!=0 &&!(strcmp(record[i]->tag,"CONT")==0)){
+			
+			insertSorted(&(submitter->otherFields), createField(record[i]));
+			
+		}	
+	**/
+	}
+
+
+	//free(event->date);
+	//free(event->place);	
+	//free(event);
+
+	/**printf("Submitter");
+	Node * ptr;
+	ptr = (submitter->otherFields).head;
+	char* tempString;
+	printf("Other Fields\n");
+	
+	while(ptr!=NULL){
+		tempString = printField(ptr->data);
+		printf("%s\n",tempString);
+		free(tempString);
+		ptr = ptr->next;
+	}
+	**/
+
+	return event;
+	
+	
+	
+	
 }
