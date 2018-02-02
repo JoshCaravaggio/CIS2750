@@ -29,6 +29,17 @@ typedef struct {
     
 } GEDCOMLine;
 
+ //Holds a void pointer to some record data and it's respective cross-reference ID
+typedef struct {
+	    
+    //Reference ID
+    char* ref_ID;
+    
+    //Void pointer to data associated with the reference ID
+    void* data;
+    
+} GEDCOMreference;
+
 
 /** Function to free a field 
  *@pre Field must exist
@@ -134,6 +145,14 @@ Submitter* createSubmitter(GEDCOMLine ** record, int numLines);
  *@param number of lines in the array 
  **/
 Individual* createIndividual(GEDCOMLine ** record, int numLines);
+/** Function to parse an array of GEDCOMLines for information to construct a Family object 
+ *@pre GEDCOM Line array must exist
+ *@post new family structure will be returned
+ *@return family structure
+ *@param pointer to array of GEDCOM Line pointers
+ *@param number of lines in the array 
+ **/
+Family* createFamily(GEDCOMLine ** record, int numLines);
 /** Function to parse an array of GEDCOMLines and concatenate lines tagged to do so
  *@pre GEDCOM Line array must exist
  *@post lines with CONC and CONT tags will be respectively processed
@@ -141,6 +160,7 @@ Individual* createIndividual(GEDCOMLine ** record, int numLines);
  *@param pointer to array of GEDCOM Line pointers
  *@param number of lines in the array 
  **/
+ 
 void appender(GEDCOMLine ** record, int numLines);
 /** Function to tajke a string representation of a character set and return the respective enumerated type
  *@pre charset string must exist
@@ -156,7 +176,6 @@ CharSet decodeCharSet(char* toBeConverted);
  *@param string token of tag
  **/
 bool validateHeaderTag(char* toValidate);
-
 
 /** Function to handle parsing and allocation of a  
  *@pre line must be allocated
@@ -182,5 +201,35 @@ char * getLine(char *destination, int maxLength, FILE *fp);
  *@param number of lines in the array 
  **/
 Event* createEvent(GEDCOMLine ** record, int numLines);
+/** Function to create a reference structure that contains the ref ID and a pointer to the respective data
+ *@pre data must be allocated, ref_ID must be stored
+ *@post new reference structure will be returned
+ *@return GEDCOMreference structure
+ *@param string representing ref IDs
+ *@param void data pointer to point the reference at 
+ **/
+GEDCOMreference* createReference(char* ref_ID, void * data);
+/** Empty delete function to help handle freeing circular dependencies 
+ *@pre data must be allocated
+ *@post Literally nothing
+ *@return Still nothing
+ *@param void data for nothing to be done with
+ **/
+void dummyDelete(void* toBeDeleted);
+/** Function to check validity of the GEDCOM filename to be parsed
+ *@pre string must be non-null
+ *@post return true or false based on the file's validity
+ *@return boolean value
+ *@param string token of file name
+ **/
+bool validateFileName(char* toValidate);
+/** Function to create a string representing an enumerated character set encoding
+ *@pre string must be non-null
+ *@post allocate and return a string represting the encoding
+ *@return string with encoding type
+ *@param CharSet to be read
+ **/
+char* printEncoding(CharSet encoding);
+bool testCompare(const void * first, const void* second);
 
 #endif

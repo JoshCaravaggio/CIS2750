@@ -21,6 +21,7 @@ char* (*printFunction)(void* toBePrinted),void (*deleteFunction)(void* toBeDelet
 	tmpList.deleteData = deleteFunction;
 	tmpList.compare = compareFunction;
 	tmpList.printData = printFunction;
+	tmpList.length = 0;
 	
 	return tmpList;
 }

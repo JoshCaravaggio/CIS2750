@@ -4,6 +4,7 @@
 
 #include "LinkedListAPI.h"
 #include "GEDCOMparser.h"
+#include "GEDCOMutilities.h"
 
 int main(int argc,char **argv){
 
@@ -144,12 +145,27 @@ int main(int argc,char **argv){
 	
 	deleteEvent(testEvent1);
 	deleteEvent(testEvent2);
-	**/	
-	GEDCOMobject** testObject= NULL;
+		
+**/
+	GEDCOMobject *testObject = NULL; 
 	
-	GEDCOMerror error = createGEDCOM("test.ged", testObject);
-	printf("Error report: Line: %d Type: %d\n",error.line,error.type);
+	GEDCOMerror error = createGEDCOM("shakespeare.ged", &testObject);
+	
+	char* string = NULL;
+	
+	string = printGEDCOM(testObject);
 
+	if(string!=NULL)printf("%s\n",string);
+	free(string);	
+	string = printError(error);
+	if(string!=NULL)printf("%s\n",string);
+	free(string);
+	if(testObject!=NULL)deleteGEDCOM(testObject);
+
+
+	
+
+		
 	
 	return 0;
 }

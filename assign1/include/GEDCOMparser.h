@@ -185,6 +185,7 @@ void deleteGEDCOM(GEDCOMobject* obj);
  *@param err - an error struct
  **/
 char* printError(GEDCOMerror err);
+	
 
 /** Function that searches for an individual in the list using a comparator function.
  * If an individual is found, a pointer to the Individual record
