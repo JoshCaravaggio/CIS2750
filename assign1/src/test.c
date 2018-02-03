@@ -5,7 +5,6 @@
 #include "LinkedListAPI.h"
 #include "GEDCOMparser.h"
 #include "GEDCOMutilities.h"
-
 int main(int argc,char **argv){
 
 
@@ -149,22 +148,53 @@ int main(int argc,char **argv){
 **/
 	GEDCOMobject *testObject = NULL; 
 	
-	GEDCOMerror error = createGEDCOM("shakespeare.ged", &testObject);
+	GEDCOMerror error = createGEDCOM("royal92.ged", &testObject);
 	
 	char* string = NULL;
 	
-	string = printGEDCOM(testObject);
+	//string = printGEDCOM(testObject);
 
-	if(string!=NULL)printf("%s\n",string);
-	free(string);	
+	//if(string!=NULL)printf("%s\n",string);
+	//free(string);	
 	string = printError(error);
 	if(string!=NULL)printf("%s\n",string);
 	free(string);
-	if(testObject!=NULL)deleteGEDCOM(testObject);
 
+
+	/**Individual* testIndividual1 = malloc(sizeof(Individual));
 
 	
+	char* givenName1 = malloc(sizeof(char)*120);
+	char* surname1 = malloc(sizeof(char)*120);
+		
+	strcpy(surname1,"Shakespeare");
+	strcpy(givenName1,"John");
+	testIndividual1->surname = surname1;
+	testIndividual1->givenName = givenName1;
+	
+	Individual *testIndividual2 = findPerson(testObject, testCompare, testIndividual1);
+	
+	
+	List descendantList = getDescendants(testObject, testIndividual2);
+	
 
+	Node* ptr2 = NULL;
+	ptr2 = (descendantList).head;
+	
+	while(ptr2!=NULL){
+
+		string = printIndividual(ptr2->data);		
+		printf("%s\n", string);
+		free(string);
+		ptr2 = ptr2->next;				
+		
+	}	
+	clearList(&descendantList);
+		
+	deleteIndividual(testIndividual1);
+	**/
+	
+	if(testObject!=NULL)deleteGEDCOM(testObject);
 		
 	
 	return 0;

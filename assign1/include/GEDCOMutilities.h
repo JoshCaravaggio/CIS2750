@@ -230,6 +230,17 @@ bool validateFileName(char* toValidate);
  *@param CharSet to be read
  **/
 char* printEncoding(CharSet encoding);
-bool testCompare(const void * first, const void* second);
+
+bool testCompare(const void *first, const void *second);
+
+/** Function to take an individual and a list and recursively add that
+ * individual's children to the list, then all of their childen's children, etc...
+ *@pre Individual must be non null, list must be initialized with dummyDelete function
+ *@post the pointer list that gets passed in will be populated with the person's descendents 
+ *@return none
+ *@param pointer to descendent list, which is to be populated
+ *@param pointer to individual whose descendants are to be found
+ **/
+void recursivelyAddDescendants(List *descendantList, const Individual* currentPerson);
 
 #endif
