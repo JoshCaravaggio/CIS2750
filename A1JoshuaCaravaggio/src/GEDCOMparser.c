@@ -36,7 +36,6 @@ GEDCOMerror createGEDCOM(char* fileName, GEDCOMobject** obj){
 	object->individuals = initializeList(printIndividual,deleteIndividual,compareIndividuals);
 	object->families = initializeList(printFamily,deleteFamily,compareFamilies);
 	 
-	
 
 	int i;
 	int j;
@@ -1725,7 +1724,6 @@ Submitter* createSubmitter(GEDCOMLine ** record, int numLines){
 			
 			}else{			
 				
-				//nameFound = true;
 				strcpy(submitter->submitterName, record[i]->value);		
 
 			}

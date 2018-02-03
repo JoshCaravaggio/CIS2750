@@ -8,7 +8,7 @@
 #include <ctype.h>
 #include "LinkedListAPI.h"
 #include "GEDCOMparser.h"
-#
+
 
 //Represents a single line of a GEDCOM file
 typedef struct {
