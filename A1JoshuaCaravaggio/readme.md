@@ -9,7 +9,7 @@
 ### Program Description
 
 
-###createGEDCOM
+### createGEDCOM
 
 The createGEDCOM function handles the parsing of a the gedcom file whose name is passed
 in as the parameter fileName. If the file is not a gedcom file, the file is invalid or cannot
