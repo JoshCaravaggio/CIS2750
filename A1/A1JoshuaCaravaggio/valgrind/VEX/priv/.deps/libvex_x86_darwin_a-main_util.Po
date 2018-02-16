@@ -1,0 +1,21 @@
+priv/libvex_x86_darwin_a-main_util.o: priv/main_util.c \
+  ../VEX/pub/libvex_basictypes.h ../VEX/pub/libvex.h \
+  ../VEX/pub/libvex_ir.h priv/main_globals.h priv/main_util.h \
+  ../VEX/pub/libvex_inner.h ../config.h \
+  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../lib/clang/8.0.0/include/stdarg.h
+
+../VEX/pub/libvex_basictypes.h:
+
+../VEX/pub/libvex.h:
+
+../VEX/pub/libvex_ir.h:
+
+priv/main_globals.h:
+
+priv/main_util.h:
+
+../VEX/pub/libvex_inner.h:
+
+../config.h:
+
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../lib/clang/8.0.0/include/stdarg.h:
