@@ -168,7 +168,7 @@ void* deleteDataFromList(List* list, void* toBeDeleted){
 	}
 	
 	Node* tmp = list->head;
-	printf("Gets to here\n");
+	
 	while(tmp != NULL){
 		if (list->compare(toBeDeleted, tmp->data) == 0){
 			//Unlink the node

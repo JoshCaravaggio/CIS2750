@@ -412,12 +412,10 @@ GEDCOMerror createGEDCOM(char* fileName, GEDCOMobject** obj){
 						insertSorted(&(tempIndi->families), (Family*)(referenceArray[i]->data));
 						
 					}				
-				}						
+				}
+				deleteDataFromList(&(tempIndi->otherFields), tempField);						
 			}
 			ptr2 = ptr2->next;
-			printf("Gets to here\n");
-			deleteDataFromList(&(tempIndi->otherFields), (ptr2->previous)->data);		
-			printf("Gets to here\n");
 		
 		}
 		ptr1 = ptr1->next;
@@ -446,11 +444,12 @@ GEDCOMerror createGEDCOM(char* fileName, GEDCOMobject** obj){
 						if(strcmp(tempField->tag, "WIFE")==0){
 							tempFamily->wife =  (Individual*)(referenceArray[i]->data);						
 						}
-					
+						deleteDataFromList(&(tempFamily->otherFields), tempField);	
 					}				
 				}						
 			}
-			ptr2 = ptr2->next;		
+			ptr2 = ptr2->next;	
+
 		}
 		ptr1 = ptr1->next;
 	}
