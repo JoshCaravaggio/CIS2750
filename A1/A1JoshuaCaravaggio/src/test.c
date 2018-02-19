@@ -141,14 +141,14 @@ int main(int argc,char **argv){
 **/
 	GEDCOMobject *testObject = NULL; 
 	
-	GEDCOMerror error = createGEDCOM("shakespeare.ged", &testObject);
+	GEDCOMerror error = createGEDCOM("testFiles/nonASCIIEncoded.ged", &testObject);
 	
 	char* string = NULL;
 	
-	//string = printGEDCOM(testObject);
+	string = printGEDCOM(testObject);
 
-	//if(string!=NULL)printf("%s\n",string);
-	//free(string);	
+	if(string!=NULL)printf("%s\n",string);
+	free(string);	
 	string = printError(error);
 	if(string!=NULL)printf("%s\n",string);
 	free(string);
