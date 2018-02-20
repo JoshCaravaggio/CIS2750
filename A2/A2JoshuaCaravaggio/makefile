@@ -21,7 +21,7 @@ parser:
 	$(CC) $(CFLAGS) $(INCLUDE) -c $(SRC)GEDCOMparser.c -o $(BIN)GEDCOMparser.o
 	$(LIB) $(BIN)libparser.a $(BIN)GEDCOMparser.o
 run:
-	 ./$(TEST)
+	 valgrind ./$(TEST)
 	
 runLeaks:
 	valgrind --leak-check=full  --show-leak-kinds=all --track-origins=yes ./$(TEST)

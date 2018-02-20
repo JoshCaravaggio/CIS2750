@@ -18,7 +18,17 @@ GEDCOMerror createGEDCOM(char* fileName, GEDCOMobject** obj){
 	GEDCOMerror error;
 	
 	if(validateFileName(fileName)){
+
 		fp = fopen(fileName, "r");
+
+		if(fp==NULL){
+
+			error.type = INV_FILE;
+			error.line = -1;
+			return error;
+			
+		}
+
 	}else{
 		error.type = INV_FILE;
 		error.line = -1;
@@ -381,74 +391,105 @@ GEDCOMerror createGEDCOM(char* fileName, GEDCOMobject** obj){
 
 	Node* ptr1;
 	Node* ptr2;
-	
+	bool matchFound = false;
 	ptr1 = (header->otherFields).head;
 		
 	while(ptr1!=NULL){
-	
+		matchFound = false;
 		tempField = (Field*)(ptr1->data);		
 		if(strcmp(tempField->tag, "SUBM")==0){
 			for(i = 0; i<referenceCounter; i++){
 				if(strcmp(tempField->value, referenceArray[i]->ref_ID)==0){
 					header->submitter = (Submitter*)(referenceArray[i]->data);
-					
+					ptr1 = ptr1->next;
+					deleteField(deleteDataFromList(&(header->otherFields), tempField));	
+					matchFound = true;
+					break;
+
 				}				
-			}						
-		}
-		ptr1 = ptr1->next;		
+			}				
+			if(matchFound == false)ptr1 = ptr1->next;		
+		}else{
+			ptr1 = ptr1->next;	
+		}	
 	}
 	
+	
+
 	ptr1 = (object->individuals).head;
 	while(ptr1!=NULL){
 		tempIndi = (Individual*)(ptr1->data);
 		ptr2 = (tempIndi->otherFields).head;
+
 		while(ptr2!=NULL){		
-			
+			matchFound = false;			
 			tempField = (Field*)(ptr2->data);		
 			if(strcmp(tempField->tag, "FAMS")==0||strcmp(tempField->tag, "FAMC")==0){
 				for(i = 0; i<referenceCounter; i++){
 					if(strcmp(tempField->value, referenceArray[i]->ref_ID)==0){
 						
 						insertSorted(&(tempIndi->families), (Family*)(referenceArray[i]->data));
-						
+						ptr2 = ptr2->next;
+						deleteField(deleteDataFromList(&(tempIndi->otherFields), tempField));	
+
+						matchFound = true;
+						break;
+
 					}				
 				}
-				deleteDataFromList(&(tempIndi->otherFields), tempField);						
+				if(matchFound == false)ptr2 = ptr2->next;							
+			}else{
+				ptr2 = ptr2->next;
 			}
-			ptr2 = ptr2->next;
 		
 		}
 		ptr1 = ptr1->next;
 	}		
 
-
+	
 	ptr1 = (object->families).head;
 	while(ptr1!=NULL){
 		
 		tempFamily = (Family*)(ptr1->data);
 		ptr2 = (tempFamily->otherFields).head;
 		while(ptr2!=NULL){		
-			
+			matchFound = false;
 			tempField = (Field*)(ptr2->data);		
 			if(strcmp(tempField->tag, "CHIL")==0||strcmp(tempField->tag, "HUSB")==0||strcmp(tempField->tag, "WIFE")==0){
 				for(i = 0; i<referenceCounter; i++){
+					
 					if(strcmp(tempField->value, referenceArray[i]->ref_ID)==0 ){
 						if(strcmp(tempField->tag, "CHIL")==0){
 										
 							insertSorted(&(tempFamily->children), (Individual*)(referenceArray[i]->data));
+							ptr2 = ptr2->next;
+							deleteField(deleteDataFromList(&(tempFamily->otherFields), tempField));	
+							matchFound = true;						
+							break;
 							
+						}else if(strcmp(tempField->tag, "HUSB")==0){
+							tempFamily->husband =  (Individual*)(referenceArray[i]->data);			
+							ptr2 = ptr2->next;			
+							deleteField(deleteDataFromList(&(tempFamily->otherFields), tempField));	
+							matchFound = true;
+							break;
+
+						}else if(strcmp(tempField->tag, "WIFE")==0){
+							tempFamily->wife =  (Individual*)(referenceArray[i]->data);	
+							ptr2 = ptr2->next;
+							deleteField(deleteDataFromList(&(tempFamily->otherFields), tempField));
+							matchFound = true;	
+							break;			
+
 						}
-						if(strcmp(tempField->tag, "HUSB")==0){
-							tempFamily->husband =  (Individual*)(referenceArray[i]->data);
-						}						
-						if(strcmp(tempField->tag, "WIFE")==0){
-							tempFamily->wife =  (Individual*)(referenceArray[i]->data);						
-						}
-						deleteDataFromList(&(tempFamily->otherFields), tempField);	
+
 					}				
-				}						
+				}
+				if(matchFound==false)ptr2 = ptr2->next;						
+			}else{
+				ptr2 = ptr2->next;
 			}
-			ptr2 = ptr2->next;	
+			
 
 		}
 		ptr1 = ptr1->next;
@@ -716,8 +757,12 @@ char* printError(GEDCOMerror err){
 	}else if(code == 4){
 		sprintf(errorMsg, "ERROR: INV_RECORD Line %d\n", lineNum);
 		
-	}else{
-		sprintf(errorMsg, "OTHER_ERROR\n");
+	}else if(code == 5){
+		sprintf(errorMsg, "OTHER_ERROR\n");	
+		
+		
+	}else if(code == 6){
+		sprintf(errorMsg, "ERROR: WRITE_ERROR Line %d\n", lineNum);
 		
 	}
 
@@ -780,6 +825,27 @@ List getDescendants(const GEDCOMobject* familyRecord, const Individual* person){
 	return descendantList;						
 	
 }
+GEDCOMerror writeGEDCOM(char* fileName, const GEDCOMobject* obj){
+
+	GEDCOMerror error;
+		
+	if(obj == NULL || validateFileName(fileName)==false){
+		error.type = WRITE_ERROR;
+		error.line = -1;
+		return error;
+
+	}
+
+	FILE * fp = fopen(fileName, "w");
+	writeHeader(fp, obj->header);
+	writeSubmitter(fp, obj->submitter);
+
+	error.type = OK;
+	error.line = -1;
+	fclose(fp);
+	return error;
+}
+
 //***********************************************************************************************************
 
 //****************************************** List helper functions *******************************************
@@ -947,6 +1013,21 @@ char* printIndividual(void* toBePrinted){
 		individualInfo = realloc(individualInfo,sizeof(char)* (currentLength+ (strlen(tempString)+2) ));				
 		strcat(individualInfo, tempString);
 		strcat(individualInfo, "\n");
+		free(tempString);
+		currentLength = strlen(individualInfo)+1;
+		ptr = ptr->next;
+		
+	}
+	individualInfo = realloc(individualInfo,sizeof(char)* (currentLength+30));		
+	ptr = (individual->otherFields).head;
+	strcat(individualInfo, "\nOther Fields\n");		
+	currentLength = strlen(individualInfo);
+	
+	while(ptr!=NULL){
+
+		tempString = printField(ptr->data);
+		individualInfo = realloc(individualInfo,sizeof(char)* (currentLength+ (strlen(tempString)+1) ));				
+		strcat(individualInfo, tempString);
 		free(tempString);
 		currentLength = strlen(individualInfo)+1;
 		ptr = ptr->next;
@@ -1741,6 +1822,37 @@ CharSet decodeCharSet(char* toBeConverted){
 
 }
 
+char* encodeCharSet(CharSet toEncode){
+
+	char* tempString = NULL;
+
+	if(toEncode == ANSEL){
+		
+		tempString = "ANSEL";
+		return tempString;
+			
+	}else if(toEncode == UTF8){
+	
+		tempString = "UTF-8";
+		return tempString;
+		
+	}else if(toEncode == UNICODE){
+
+		tempString = "UNICODE";
+		return tempString;
+		
+	}else if(toEncode == ASCII ){
+
+		tempString = "ASCII";
+		return tempString;
+		
+	}else{
+		
+		return NULL;
+		
+	}
+
+}
 
 
 Field *createField(GEDCOMLine* line){
@@ -1778,6 +1890,7 @@ Submitter* createSubmitter(GEDCOMLine ** record, int numLines){
 	strcpy(submitter->address,"");		
 	int i = 0;
 	submitter->otherFields = initializeList(printField, deleteField, compareFields);
+
 	
 
 	for(i = 0; i< numLines; i++){		
@@ -1945,6 +2058,7 @@ Individual* createIndividual(GEDCOMLine ** record, int numLines){
 			
 			k = i+1;
 			eventCounter++;
+			int lineCounter = 0;
 			memcpy(&currentEvent[eventCounter-1], &record[i], sizeof(GEDCOMLine*));	
 					
 			while(record[k]->level>=2){
@@ -1952,7 +2066,7 @@ Individual* createIndividual(GEDCOMLine ** record, int numLines){
 				eventCounter++;
 				currentEvent = realloc(currentEvent, sizeof(GEDCOMLine*) * (eventCounter+1));
 				memcpy(&currentEvent[eventCounter-1], &record[k], sizeof(GEDCOMLine*));
-							
+				lineCounter++;			
 				k++;
 			}
 			
@@ -1974,9 +2088,10 @@ Individual* createIndividual(GEDCOMLine ** record, int numLines){
 			}
 												
 			insertSorted(&(individual->events),tempEvent);				
+			i = i + lineCounter-1;
 			tempEvent = NULL;								
 					
-		}else if((!(strcmp(record[i]->tag,"CONC")==0)&& i!=0 &&!(strcmp(record[i]->tag,"CONT")==0))&& i>0){
+		}else if((!(strcmp(record[i]->tag,"CONC")==0)&& i!=0 &&!(strcmp(record[i]->tag,"CONT")==0))&& i>0 && record[i]->level <2){
 			
 			insertSorted(&(individual->otherFields), createField(record[i]));
 			
@@ -2104,6 +2219,7 @@ Family* createFamily(GEDCOMLine ** record, int numLines){
 		}else if(record[i]->level == 1 && (record[i]->value == NULL || strcmp(record[i]->value, "Y")==0) ) {
 
 			k = i+1;
+			int lineCounter = 0;
 			eventCounter++;
 			memcpy(&currentEvent[eventCounter-1], &record[i], sizeof(GEDCOMLine*));		
 							
@@ -2111,7 +2227,8 @@ Family* createFamily(GEDCOMLine ** record, int numLines){
 	
 				eventCounter++;
 				currentEvent = realloc(currentEvent, sizeof(GEDCOMLine*) * (eventCounter+1));
-				memcpy(&currentEvent[eventCounter-1], &record[k], sizeof(GEDCOMLine*));							
+				memcpy(&currentEvent[eventCounter-1], &record[k], sizeof(GEDCOMLine*));			
+				lineCounter++;				
 				k++;
 				
 			}
@@ -2141,10 +2258,10 @@ Family* createFamily(GEDCOMLine ** record, int numLines){
 				insertSorted(&(family->events),tempEvent);
 				
 			}	
-			
+			i = i + lineCounter-1;
 			tempEvent = NULL;								
 					
-		}else if((!(strcmp(record[i]->tag,"CONC")==0)&& i!=0 &&!(strcmp(record[i]->tag,"CONT")==0)) &&i > 0){
+		}else if((!(strcmp(record[i]->tag,"CONC")==0)&& i!=0 &&!(strcmp(record[i]->tag,"CONT")==0)) &&i > 0 && record[i]->level<2){
 			
 			insertSorted(&(family->otherFields), createField(record[i]));
 			
@@ -2193,12 +2310,7 @@ bool validateFileName(char* toValidate){
 		
 	}
 	FILE* fp= fopen(toValidate, "r");
-	if(fp==NULL){
-		
-		free(tempFileName);	
-		return false;
-			
-	}
+
 	
 	if(fp!=NULL)fclose(fp);
 	free(tempFileName);
@@ -2272,5 +2384,87 @@ void recursivelyAddDescendants(List *descendantList, const Individual* currentPe
 		ptr1 = ptr1->next;				
 		
 	}
+	
+}
+
+
+
+GEDCOMerror writeHeader(FILE * fp, Header* header){
+
+	GEDCOMerror error;
+	if(header == NULL || fp == NULL){
+		error.type = WRITE_ERROR;
+		error.line = -1;
+		return error;
+
+	}
+	char* tempString = NULL;
+							
+	fprintf(fp, "0 HEAD\n");
+	tempString = header->source;		
+	
+	if(tempString!=NULL){			
+
+		fprintf(fp, "1 SOUR ");
+		fprintf(fp,"%s\n",tempString);
+		
+	}
+	tempString = encodeCharSet(header->encoding);
+	if(tempString!=NULL){			
+
+		fprintf(fp,"1 CHAR ");
+		fprintf(fp, "%s\n", tempString);
+		
+	}
+	fprintf(fp,"1 GEDC\n");
+	fprintf(fp,"1 VERS ");	
+	fprintf(fp,"%.1f\n", header->gedcVersion);
+	fprintf(fp,"1 FORM LINEAGE-LINKED\n");		
+
+	error.type = OK;
+	error.line = -1;
+	return error;
+	
+}
+
+GEDCOMerror writeSubmitter(FILE * fp, Submitter* submitter){
+
+	GEDCOMerror error;
+	if(submitter == NULL || fp == NULL){
+		error.type = WRITE_ERROR;
+		error.line = -1;
+		return error;
+
+	}
+	char* tempString = NULL;
+							
+	fprintf(fp, "0 SUBM\n");
+	tempString = submitter->submitterName;		
+	
+	if(tempString!=NULL){			
+
+		fprintf(fp, "1 NAME ");
+		fprintf(fp,"%s\n",tempString);
+		
+	}
+
+	tempString = submitter->address;
+
+	if(strcmp(tempString,"")!=0){			
+
+		fprintf(fp, "1 ADDR ");
+		char* token = strtok(tempString, "\n");
+		fprintf(fp, "%s\n", token);
+
+		while((token = strtok(NULL, "\n"))!= NULL){
+
+			fprintf(fp, "2 CONT %s\n", token);
+		}
+		
+	}
+
+	error.type = OK;
+	error.line = -1;
+	return error;
 	
 }

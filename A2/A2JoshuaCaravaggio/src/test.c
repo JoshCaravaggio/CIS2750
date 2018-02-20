@@ -153,6 +153,10 @@ int main(int argc,char **argv){
 	if(string!=NULL)printf("%s\n",string);
 	free(string);
 
+	GEDCOMerror error2 = writeGEDCOM("shakespeareWritten.ged", testObject);
+	string = printError(error2);
+	if(string!=NULL)printf("%s\n",string);
+	free(string);
 
 	/**Individual* testIndividual1 = malloc(sizeof(Individual));
 	
