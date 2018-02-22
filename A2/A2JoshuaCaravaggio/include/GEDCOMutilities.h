@@ -231,7 +231,6 @@ bool validateFileName(char* toValidate);
  **/
 char* printEncoding(CharSet encoding);
 
-bool testCompare(const void *first, const void *second);
 
 /** Function to take an individual and a list and recursively add that
  * individual's children to the list, then all of their childen's children, etc...
@@ -303,7 +302,7 @@ GEDCOMerror writeEvent(FILE * fp, Event* event);
  *@param counter representing the current generation count
  *@param maximum number of generations to collect data on
  **/
-void recursivelyAddDescendantsN(List *descendantList, const Individual* currentPerson, int counter, int maxGen);
+void recursivelyAddDescendantsN(List *descendantList,List* currentGeneration,  const Individual* currentPerson, int counter, int maxGen);
 /** Function to check if an individual is a child in that family
 * @pre Individual must be in that family
 * @post function indicates whether individual is a child in the family or parent

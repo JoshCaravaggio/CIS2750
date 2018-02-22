@@ -165,41 +165,20 @@ int main(int argc,char **argv){
 	if(string!=NULL)printf("Validate: %s\n",string);
 	free(string);
 
+	Node* ptr = (testObject->individuals).tail;
+	ptr = ptr->previous->previous->previous;
 
+	Individual* testIndividual2 = (Individual*)ptr->data;
+	
 
-	/**Individual* testIndividual1 = malloc(sizeof(Individual));
-	
-	char* givenName1 = malloc(sizeof(char)*120);
-	char* surname1 = malloc(sizeof(char)*120);
-		
-	strcpy(surname1,"Shakespeare");
-	strcpy(givenName1,"John");
-	testIndividual1->surname = surname1;
-	testIndividual1->givenName = givenName1;
-	
-	Individual *testIndividual2 = findPerson(testObject, testCompare, testIndividual1);
-	
-	
-	List descendantList = getDescendants(testObject, testIndividual2);
-	
-	Node* ptr2 = NULL;
-	ptr2 = (descendantList).head;
-	
-	while(ptr2!=NULL){
-		string = printIndividual(ptr2->data);		
-		printf("%s\n", string);
-		free(string);
-		ptr2 = ptr2->next;				
-		
-	}	
+	List descendantList = getDescendantListN(testObject, testIndividual2, 1);
+
+	for( ptr = descendantList.head; ptr !=NULL; ptr = ptr->next){
+		printf("Clearing generation\n");	
+		clearList((ptr->data));
+
+	}
 	clearList(&descendantList);
-		
-	deleteIndividual(testIndividual1);
-	**/
-		
-
-
-
 	deleteGEDCOM(testObject);
 		
 	

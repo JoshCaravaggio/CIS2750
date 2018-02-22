@@ -1003,10 +1003,12 @@ ErrorCode validateGEDCOM(const GEDCOMobject* obj){
 List getDescendantListN(const GEDCOMobject* familyRecord, const Individual* person, unsigned int maxGen){
 
 	List descendantListN = initializeList(printIndividualList, dummyDelete ,compareIndividualsLists );
-
+	char* string = NULL;
+	printf("Finding descendents of %s %s\n", person->givenName, person->surname);
+	free(string);
 	List firstGeneration = initializeList(printIndividual, dummyDelete, compareIndividuals);
 	insertFront(&descendantListN,&firstGeneration);
-	recursivelyAddDescendantsN(&descendantListN, person, 0 , maxGen);
+	recursivelyAddDescendantsN(&descendantListN, &firstGeneration,  person, 0 , maxGen);
 
 	return descendantListN;
 }
@@ -2936,20 +2938,15 @@ char* printIndividualList(void* toBePrinted){
 	return listString;
 
 }
-void recursivelyAddDescendantsN(List *descendantList, const Individual* currentPerson, int counter,int  maxGen){
+void recursivelyAddDescendantsN(List *descendantList,List * currentGeneration ,const Individual* currentPerson, int counter,int  maxGen){
 
 	Family* tempFam;
 	Individual* tempIndi;
 	Node* ptr1;
 	Node* ptr2;
-	int i = 0;
+
 	ptr1 = descendantList->head;
-
-	while( ptr1!=NULL && i < maxGen ){
-
-		ptr1 = ptr1->next;
-
-	}		
+	
 
 	for(ptr1 = (currentPerson->families).head; ptr1!=NULL; ptr1 = ptr1->next){
 		
@@ -2961,10 +2958,31 @@ void recursivelyAddDescendantsN(List *descendantList, const Individual* currentP
 				
 				tempIndi = (Individual*)(ptr2->data);
 
-				if(listContains())
+				if(!(listContains(currentGeneration, tempIndi))){
+
+					printf("Adding %s %s to generation %d\n", tempIndi->givenName, tempIndi->surname, counter+1);
+					insertSorted(currentGeneration, tempIndi);
+
+				}
 			}
 
 		}
+
+	}
+
+	counter++;
+	if(counter< maxGen || maxGen == 0){
+		
+		List newGeneration = initializeList(printIndividual, dummyDelete, compareIndividuals);
+		insertBack(descendantList, &newGeneration);
+
+		for(ptr1 = currentGeneration->head; ptr1!=NULL; ptr1 = ptr1->next){
+
+			recursivelyAddDescendantsN(descendantList,&newGeneration, ptr1->data, counter, maxGen);			
+
+		}
+
+
 
 	}
 
