@@ -315,5 +315,6 @@ bool isChild(Family* family, Individual* individual);
 bool listContains(List* list, void* target );
 int compareIndividualsLists(const void* first,const void* second);
 char* printIndividualList(void* toBePrinted);
+void deleteIndividualList(void * toBeDeleted);
 
 #endif

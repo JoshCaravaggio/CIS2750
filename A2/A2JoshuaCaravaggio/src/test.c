@@ -171,13 +171,8 @@ int main(int argc,char **argv){
 	Individual* testIndividual2 = (Individual*)ptr->data;
 	
 
-	List descendantList = getDescendantListN(testObject, testIndividual2, 1);
+	List descendantList = getDescendantListN(testObject, testIndividual2,2);
 
-	for( ptr = descendantList.head; ptr !=NULL; ptr = ptr->next){
-		printf("Clearing generation\n");	
-		clearList((ptr->data));
-
-	}
 	clearList(&descendantList);
 	deleteGEDCOM(testObject);
 		

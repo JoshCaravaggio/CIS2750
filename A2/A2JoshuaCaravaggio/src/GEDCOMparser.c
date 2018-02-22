@@ -813,7 +813,7 @@ Individual* findPerson(const GEDCOMobject* familyRecord, bool (*compare)(const v
 
 List getDescendants(const GEDCOMobject* familyRecord, const Individual* person){
 
-	List descendantList = initializeList(printIndividual, clearList, compareIndividuals);
+	List descendantList = initializeList(printIndividual, dummyDelete, compareIndividuals);
 	
 	if(familyRecord ==NULL || person == NULL){
 		
@@ -1002,12 +1002,12 @@ ErrorCode validateGEDCOM(const GEDCOMobject* obj){
 
 List getDescendantListN(const GEDCOMobject* familyRecord, const Individual* person, unsigned int maxGen){
 
-	List descendantListN = initializeList(printIndividualList, dummyDelete ,compareIndividualsLists );
+	List descendantListN = initializeList(printIndividualList, deleteIndividualList ,compareIndividualsLists );
 	char* string = NULL;
 	printf("Finding descendents of %s %s\n", person->givenName, person->surname);
 	free(string);
 	List firstGeneration = initializeList(printIndividual, dummyDelete, compareIndividuals);
-	insertFront(&descendantListN,&firstGeneration);
+	insertBack(&descendantListN,&firstGeneration);
 	recursivelyAddDescendantsN(&descendantListN, &firstGeneration,  person, 0 , maxGen);
 
 	return descendantListN;
@@ -2902,7 +2902,12 @@ bool isChild(Family* family, Individual* individual){
 	}
 	return false;
 }
+void deleteIndividualList(void * toBeDeleted){
+	List* list = (List*)toBeDeleted;
+	clearList(list);
 
+
+}
 int compareIndividualsLists(const void* first,const void* second){
 	return -1;
 }
@@ -2981,8 +2986,6 @@ void recursivelyAddDescendantsN(List *descendantList,List * currentGeneration ,c
 			recursivelyAddDescendantsN(descendantList,&newGeneration, ptr1->data, counter, maxGen);			
 
 		}
-
-
 
 	}
 
