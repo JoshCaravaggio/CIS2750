@@ -1004,7 +1004,6 @@ List getDescendantListN(const GEDCOMobject* familyRecord, const Individual* pers
 
 	List descendantListN = initializeList(printIndividualList, deleteIndividualList ,compareIndividualsLists );
 	char* string = NULL;
-	printf("Finding descendents of %s %s\n", person->givenName, person->surname);
 	free(string);
 	List* firstGeneration = calloc(sizeof(List),1);
 	firstGeneration->head = NULL;
@@ -1015,10 +1014,30 @@ List getDescendantListN(const GEDCOMobject* familyRecord, const Individual* pers
 	firstGeneration->length = 0;
 	
 	insertBack(&descendantListN,firstGeneration);
-	recursivelyAddDescendantsN(&descendantListN, firstGeneration,  person, 0 , maxGen);
+	recursivelyAddDescendantsN(&descendantListN, firstGeneration,  person, 1 , maxGen);
 
 	return descendantListN;
 }
+
+List getAncestorListN(const GEDCOMobject* familyRecord, const Individual* person, int maxGen){
+
+	List ancestorListN = initializeList(printIndividualList, deleteIndividualList ,compareIndividualsLists );
+	char* string = NULL;
+	free(string);
+	List* firstGeneration = calloc(sizeof(List),1);
+	firstGeneration->head = NULL;
+	firstGeneration->tail = NULL;
+	firstGeneration->deleteData = dummyDelete;
+	firstGeneration->compare = compareIndividuals;
+	firstGeneration->printData = printIndividual;
+	firstGeneration->length = 0;
+	
+	insertBack(&ancestorListN,firstGeneration);
+	recursivelyAddAncestorsN(&ancestorListN, firstGeneration,  person, 1 , maxGen);
+
+	return ancestorListN;
+}
+
 
 
 
@@ -2996,9 +3015,9 @@ void recursivelyAddDescendantsN(List *descendantList,List * currentGeneration ,c
 
 	}
 
-	counter++;
-	if(counter< maxGen || maxGen == 0){
-		
+	if((counter< maxGen )||(maxGen == 0 && isEmpty(currentGeneration)==false)){		
+
+		counter++;
 		List* newGeneration = calloc(sizeof(List),1);
 		newGeneration->head = NULL;
 		newGeneration->tail = NULL;
@@ -3006,7 +3025,7 @@ void recursivelyAddDescendantsN(List *descendantList,List * currentGeneration ,c
 		newGeneration->compare = compareIndividuals;
 		newGeneration->printData = printIndividual;
 		newGeneration->length = 0;
-		insertBack(descendantList, newGeneration);
+
 
 		for(ptr1 = currentGeneration->head; ptr1!=NULL; ptr1 = ptr1->next){
 
@@ -3014,8 +3033,75 @@ void recursivelyAddDescendantsN(List *descendantList,List * currentGeneration ,c
 
 		}
 
+		if(isEmpty(newGeneration)){
+			clearList(newGeneration);
+			free(newGeneration);
+		}else{
+			insertSorted(descendantList, newGeneration);
+		}
+		
 	}
 
+}
+void recursivelyAddAncestorsN(List *ancestorList,List * currentGeneration ,const Individual* currentPerson, int counter,int  maxGen){
+
+	Family* tempFam;
+	Individual* tempIndi;
+	Node* ptr1;
+
+	
+	for(ptr1 = (currentPerson->families).head; ptr1!=NULL; ptr1 = ptr1->next){
+		
+		tempFam = (Family*)ptr1->data;
+
+		if(!(tempFam->wife == currentPerson|| tempFam->husband == currentPerson)){
+				
+			tempIndi = tempFam->wife;
+
+			if(!(listContains(currentGeneration, tempIndi))){
+
+				insertSorted(currentGeneration, tempIndi);
+
+			}
+			tempIndi = tempFam->husband;
+			
+			if(!(listContains(currentGeneration, tempIndi))){
+
+				insertSorted(currentGeneration, tempIndi);
+
+			}
+
+
+		}
+
+	}
+
+	if((counter< maxGen )||(maxGen == 0 && isEmpty(currentGeneration)==false)){		
+
+		counter++;
+		List* newGeneration = calloc(sizeof(List),1);
+		newGeneration->head = NULL;
+		newGeneration->tail = NULL;
+		newGeneration->deleteData = dummyDelete;
+		newGeneration->compare = compareIndividuals;
+		newGeneration->printData = printIndividual;
+		newGeneration->length = 0;
+
+
+		for(ptr1 = currentGeneration->head; ptr1!=NULL; ptr1 = ptr1->next){
+
+			recursivelyAddAncestorsN(ancestorList,newGeneration, ptr1->data, counter, maxGen);			
+
+		}
+
+		if(isEmpty(newGeneration)){
+			clearList(newGeneration);
+			free(newGeneration);
+		}else{
+			insertSorted(ancestorList, newGeneration);
+		}
+		
+	}
 
 }
 
@@ -3029,4 +3115,13 @@ bool listContains(List* list, void* target ){
 	}
 	return false;
 
+}
+bool isEmpty(List* list){
+	if(list == NULL){
+		return true;
+	}
+	if(list->head == NULL || list->tail == NULL){
+		return true;
+	}
+	return false;
 }

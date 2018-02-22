@@ -311,6 +311,9 @@ void recursivelyAddDescendantsN(List *descendantList,List* currentGeneration,  c
 * @param individual
 **/
 bool isChild(Family* family, Individual* individual);
+bool isEmpty(List* list);
+void recursivelyAddAncestorsN(List *ancestorList,List * currentGeneration ,const Individual* currentPerson, int counter,int  maxGen);
+
 
 bool listContains(List* list, void* target );
 int compareIndividualsLists(const void* first,const void* second);

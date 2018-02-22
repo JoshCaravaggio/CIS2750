@@ -171,7 +171,7 @@ int main(int argc,char **argv){
 	Individual* testIndividual2 = (Individual*)ptr->data;
 	
 
-	List descendantList = getDescendantListN(testObject, testIndividual2,1);
+	List descendantList = getAncestorListN(testObject, testIndividual2,2);
 
 	for(Node * famPtr =  descendantList.head; famPtr!=NULL; famPtr = famPtr->next){
 
