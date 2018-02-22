@@ -173,6 +173,16 @@ int main(int argc,char **argv){
 
 	List descendantList = getDescendantListN(testObject, testIndividual2,2);
 
+	for(Node * famPtr =  descendantList.head; famPtr!=NULL; famPtr = famPtr->next){
+
+		List* testList = (List*)(famPtr->data);
+
+		for(Node* ptr = testList->head; ptr !=NULL; ptr = ptr->next){
+			Individual* indi = (Individual*)ptr->data;
+			printf("%s %s\n", indi->givenName, indi->surname);
+		}
+	}
+
 	clearList(&descendantList);
 	deleteGEDCOM(testObject);
 		

@@ -1006,9 +1006,16 @@ List getDescendantListN(const GEDCOMobject* familyRecord, const Individual* pers
 	char* string = NULL;
 	printf("Finding descendents of %s %s\n", person->givenName, person->surname);
 	free(string);
-	List firstGeneration = initializeList(printIndividual, dummyDelete, compareIndividuals);
-	insertBack(&descendantListN,&firstGeneration);
-	recursivelyAddDescendantsN(&descendantListN, &firstGeneration,  person, 0 , maxGen);
+	List* firstGeneration = calloc(sizeof(List),1);
+	firstGeneration->head = NULL;
+	firstGeneration->tail = NULL;
+	firstGeneration->deleteData = dummyDelete;
+	firstGeneration->compare = compareIndividuals;
+	firstGeneration->printData = printIndividual;
+	firstGeneration->length = 0;
+	
+	insertBack(&descendantListN,firstGeneration);
+	recursivelyAddDescendantsN(&descendantListN, firstGeneration,  person, 0 , maxGen);
 
 	return descendantListN;
 }
@@ -1088,7 +1095,6 @@ char* printEvent(void* toBePrinted){
 void deleteIndividual(void* toBeDeleted){
 	
 	Individual* toDelete = (Individual*)toBeDeleted;
-	
 	if(toDelete==NULL){
 		return; 
 	}else{
@@ -2903,9 +2909,27 @@ bool isChild(Family* family, Individual* individual){
 	return false;
 }
 void deleteIndividualList(void * toBeDeleted){
-	List* list = (List*)toBeDeleted;
-	clearList(list);
 
+	List* list = (List*)toBeDeleted;
+    if (list == NULL){
+		return;
+	}
+
+	if (list->head == NULL && list->tail == NULL){
+		return;
+	}
+
+	Node* tmp;
+	
+	while (list->head != NULL){
+		list->deleteData(list->head->data);
+		tmp = list->head;
+		list->head = list->head->next;
+		free(tmp);
+	}
+	
+	list->head = NULL;
+	list->tail = NULL;
 
 }
 int compareIndividualsLists(const void* first,const void* second){
@@ -2950,9 +2974,7 @@ void recursivelyAddDescendantsN(List *descendantList,List * currentGeneration ,c
 	Node* ptr1;
 	Node* ptr2;
 
-	ptr1 = descendantList->head;
 	
-
 	for(ptr1 = (currentPerson->families).head; ptr1!=NULL; ptr1 = ptr1->next){
 		
 		tempFam = (Family*)ptr1->data;
@@ -2978,12 +3000,18 @@ void recursivelyAddDescendantsN(List *descendantList,List * currentGeneration ,c
 	counter++;
 	if(counter< maxGen || maxGen == 0){
 		
-		List newGeneration = initializeList(printIndividual, dummyDelete, compareIndividuals);
-		insertBack(descendantList, &newGeneration);
+		List* newGeneration = calloc(sizeof(List),1);
+		newGeneration->head = NULL;
+		newGeneration->tail = NULL;
+		newGeneration->deleteData = dummyDelete;
+		newGeneration->compare = compareIndividuals;
+		newGeneration->printData = printIndividual;
+		newGeneration->length = 0;
+		insertBack(descendantList, newGeneration);
 
 		for(ptr1 = currentGeneration->head; ptr1!=NULL; ptr1 = ptr1->next){
 
-			recursivelyAddDescendantsN(descendantList,&newGeneration, ptr1->data, counter, maxGen);			
+			recursivelyAddDescendantsN(descendantList,newGeneration, ptr1->data, counter, maxGen);			
 
 		}
 
