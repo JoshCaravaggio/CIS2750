@@ -97,7 +97,7 @@ void insertBack(List* list, void* toBeAdded);
 *@pre 'List' type must exist and be used in order to keep track of the linked list.
 *@param list pointer to the List-type dummy node
 **/
-void clearList(List* list);
+void clearList(void* list);
 
 
 /** Uses the comparison function pointer to place the element in the 

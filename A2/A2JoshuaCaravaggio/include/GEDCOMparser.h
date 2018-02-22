@@ -213,7 +213,7 @@ List getDescendants(const GEDCOMobject* familyRecord, const Individual* person);
 
 // ****************************** A2 functions ******************************
 
-/** Function to writing a GEDCOMobject into a file in GEDCOM format.
+/** Function to iting a GEDCOMobject into a file in GEDCOM format.
  *@pre GEDCOMobject object exists, is not null, and is valid
  *@post GEDCOMobject has not been modified in any way, and a file representing the
  GEDCOMobject contents in GEDCOM format has been created

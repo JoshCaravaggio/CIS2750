@@ -266,5 +266,55 @@ char* encodeCharSet(CharSet toEncode);
  *@param pointer to Submitter whose information is to be written
  **/
 GEDCOMerror writeSubmitter(FILE * fp, Submitter* submitter);
+/** Function to write an individual to a file stream
+ *@pre Individual must exist, file pointer must be opened and non-NULL
+ *@post The individual is written to the file 
+ *@return GEDCOMerror representing success of file write
+ *@param pointer to file to be written to
+ *@param pointer to individual whose information is to be written
+ *@param array of GEDCOMreference objects reperesenting all of the references in the file
+ *@param number of entries in reference array
+ **/
+GEDCOMerror writeIndividual(FILE* fp, Individual * individual, GEDCOMreference** referenceArray, int referenceCount);
+/** Function to write a header to a file stream.
+ *@pre Header must exist, file pointer must be opened and non-NULL
+ *@post The header is written to the file 
+ *@return GEDCOMerror representing success of file write
+ *@param pointer to file to be written to
+ *@param pointer to header whose information is to be written
+ **/
+GEDCOMerror writeFamily(FILE * fp, Family* family,GEDCOMreference ** referenceArray, int referenceCount);
+/** Function to write an event into a file for writing individuals or families
+ *@pre Event must exist, file pointer must be opened and non-NULL
+ *@post The event is written to the file 
+ *@return GEDCOMerror representing success of file write
+ *@param pointer to file to be written to
+ *@param pointer to header whose information is to be written
+ **/
+GEDCOMerror writeEvent(FILE * fp, Event* event);
+/** Function to take an individual and a list and recursively add that
+ * individual's children to the list in the form of a generation list, up to a number of generations
+ * specified by maxGen
+ *@pre Individual must be non null, list must be initialized with dummyDelete function
+ *@post the pointer list that gets passed in will be populated with the person's descendents 
+ *@return none
+ *@param pointer to descendent list, which is to be populated
+ *@param pointer to individual whose descendants are to be found
+ *@param counter representing the current generation count
+ *@param maximum number of generations to collect data on
+ **/
+void recursivelyAddDescendantsN(List *descendantList, const Individual* currentPerson, int counter, int maxGen);
+/** Function to check if an individual is a child in that family
+* @pre Individual must be in that family
+* @post function indicates whether individual is a child in the family or parent
+* @return true or false based 
+* @param family that individual is in
+* @param individual
+**/
+bool isChild(Family* family, Individual* individual);
+
+bool listContains(List* list, void* target );
+int compareIndividualsLists(const void* first,const void* second);
+char* printIndividualList(void* toBePrinted);
 
 #endif

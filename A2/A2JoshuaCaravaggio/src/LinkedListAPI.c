@@ -34,7 +34,9 @@ char* (*printFunction)(void* toBePrinted),void (*deleteFunction)(void* toBeDelet
 *@param list pointer to the List-type dummy node
 *@return  on success: NULL, on failure: head of list
 **/
-void clearList(List* list){
+void clearList(void* toClear){
+	
+	List * list = (List*)toClear;
 	
     if (list == NULL){
 		return;

@@ -14,7 +14,7 @@
 1 SEX F
 1 DEAT
 2 DATE 1597
-1 FAMS @F7@
+1 FAMS @F3@
 0 @I1@ INDI
 1 NAME Mary /Arden/
 2 GIVN Mary
@@ -24,8 +24,8 @@
 2 DATE ABT 1537
 1 DEAT
 2 DATE SEP 1608
-1 FAMS @F10@
-1 FAMC @F6@
+1 FAMS @F0@
+1 FAMC @F4@
 0 @I2@ INDI
 1 NAME Robert /Arden/
 2 GIVN Robert
@@ -33,7 +33,7 @@
 1 SEX M
 1 DEAT
 2 DATE DEC 1556
-1 FAMS @F6@
+1 FAMS @F4@
 0 @I3@ INDI
 1 NAME John /Barnard/
 2 GIVN John
@@ -42,7 +42,7 @@
 1 TITL Sir
 1 DEAT
 2 DATE 1674
-1 FAMS @F3@
+1 FAMS @F7@
 0 @I4@ INDI
 1 NAME John /Hall/
 2 GIVN John
@@ -65,8 +65,8 @@
 1 DEAT
 2 DATE 06 AUG 1623
 2 PLAC Stratford-upon-Avon
-1 FAMS @F9@
-1 FAMC @F1@
+1 FAMS @F1@
+1 FAMC @F9@
 0 @I6@ INDI
 1 NAME Richard /Hathaway/
 2 GIVN Richard
@@ -74,7 +74,7 @@
 1 SEX M
 1 DEAT
 2 DATE SEP 1581
-1 FAMS @F1@
+1 FAMS @F9@
 0 @I7@ INDI
 1 NAME Thomas /Nash/
 2 GIVN Thomas
@@ -84,7 +84,7 @@
 2 DATE 1593
 1 DEAT
 2 DATE APR 1647
-1 FAMS @F4@
+1 FAMS @F6@
 0 @I8@ INDI
 1 NAME Not named /Quiney/
 2 GIVN Not named
@@ -93,7 +93,7 @@
 2 DATE 15 MAR 1616
 1 DEAT
 2 PLAC Died in childbirth
-1 FAMC @F0@
+1 FAMC @F10@
 0 @I9@ INDI
 1 NAME Richard /Quiney/
 2 GIVN Richard
@@ -107,7 +107,7 @@
 2 DATE 09 FEB 1618
 1 DEAT
 2 DATE FEB 1639
-1 FAMC @F2@
+1 FAMC @F8@
 0 @I10@ INDI
 1 NAME Shakespeare /Quiney/
 2 GIVN Shakespeare
@@ -121,8 +121,19 @@
 2 DATE 23 NOV 1616
 1 DEAT
 2 DATE MAY 1617
-1 FAMC @F2@
+1 FAMC @F8@
 0 @I11@ INDI
+1 NAME Thomas /Quiney/
+2 GIVN Thomas
+2 SURN Quiney
+1 SEX M
+1 BIRT
+2 DATE 1589
+1 DEAT
+2 DATE ABT 1655
+1 FAMS @F10@
+1 FAMC @F8@
+0 @I12@ INDI
 1 NAME Thomas /Quiney/
 2 GIVN Thomas
 2 SURN Quiney
@@ -135,18 +146,7 @@
 2 DATE 28 JAN 1639
 1 DEAT
 2 DATE JAN 1639
-1 FAMC @F2@
-0 @I12@ INDI
-1 NAME Thomas /Quiney/
-2 GIVN Thomas
-2 SURN Quiney
-1 SEX M
-1 BIRT
-2 DATE 1589
-1 DEAT
-2 DATE ABT 1655
-1 FAMS @F0@
-1 FAMC @F2@
+1 FAMC @F8@
 0 @I13@ INDI
 1 NAME Anne /Shakespeare/
 2 GIVN Anne
@@ -156,7 +156,7 @@
 2 DATE SEP 1571
 1 DEAT
 2 DATE APR 1579
-1 FAMC @F10@
+1 FAMC @F0@
 0 @I14@ INDI
 1 NAME Edmund /Shakespeare/
 2 GIVN Edmund
@@ -166,7 +166,7 @@
 2 DATE APR 1580
 1 DEAT
 2 DATE DEC 1607
-1 FAMC @F10@
+1 FAMC @F0@
 0 @I15@ INDI
 1 NAME Elizabeth /Shakespeare/
 2 GIVN Elizabeth
@@ -179,8 +179,8 @@
 2 PLAC Stratford-upon-Avon
 1 DEAT
 2 DATE FEB 1670
-1 FAMS @F3@
-1 FAMS @F4@
+1 FAMS @F6@
+1 FAMS @F7@
 1 FAMC @F5@
 0 @I16@ INDI
 1 NAME Gilbert /Shakespeare/
@@ -191,7 +191,7 @@
 2 DATE OCT 1566
 1 DEAT
 2 DATE JAN 1612
-1 FAMC @F10@
+1 FAMC @F0@
 0 @I17@ INDI
 1 NAME Hamnet /Shakespeare/
 2 GIVN Hamnet
@@ -209,7 +209,7 @@
 1 DEAT
 2 DATE AUG 1596
 2 PLAC Stratford-upon-Avon
-1 FAMC @F9@
+1 FAMC @F1@
 0 @I18@ INDI
 1 NAME Henry /Shakespeare/
 2 GIVN Henry
@@ -217,19 +217,9 @@
 1 SEX M
 1 DEAT
 2 DATE 1596
-1 FAMS @F7@
-1 FAMC @F8@
+1 FAMS @F3@
+1 FAMC @F2@
 0 @I19@ INDI
-1 NAME Joan /Shakespeare/
-2 GIVN Joan
-2 SURN Shakespeare
-1 SEX F
-1 BIRT
-2 DATE APR 1569
-1 DEAT
-2 DATE NOV 1646
-1 FAMC @F10@
-0 @I20@ INDI
 1 NAME Joan /Shakespeare/
 2 GIVN Joan
 2 SURN Shakespeare
@@ -240,7 +230,17 @@
 2 DATE 15 SEP 1558
 1 DEAT
 2 DATE AFT SEP 1558
-1 FAMC @F10@
+1 FAMC @F0@
+0 @I20@ INDI
+1 NAME Joan /Shakespeare/
+2 GIVN Joan
+2 SURN Shakespeare
+1 SEX F
+1 BIRT
+2 DATE APR 1569
+1 DEAT
+2 DATE NOV 1646
+1 FAMC @F0@
 0 @I21@ INDI
 1 NAME John /Shakespeare/
 2 GIVN John
@@ -252,8 +252,8 @@
 2 DATE 07 SEP 1601
 1 BURI
 2 DATE 08 SEP 1601
-1 FAMS @F10@
-1 FAMC @F8@
+1 FAMS @F0@
+1 FAMC @F2@
 0 @I22@ INDI
 1 NAME Judith /Shakespeare/
 2 GIVN Judith
@@ -271,8 +271,8 @@
 1 DEAT
 2 DATE FEB 1662
 2 PLAC Stratford-upon-Avon
-1 FAMS @F2@
-1 FAMC @F9@
+1 FAMS @F8@
+1 FAMC @F1@
 0 @I23@ INDI
 1 NAME Margaret /Shakespeare/
 2 GIVN Margaret
@@ -286,18 +286,8 @@
 2 DATE 30 APR 1563
 1 DEAT
 2 DATE APR 1563
-1 FAMC @F10@
+1 FAMC @F0@
 0 @I24@ INDI
-1 NAME Richard /Shakespeare/
-2 GIVN Richard
-2 SURN Shakespeare
-1 SEX M
-1 BIRT
-2 DATE ABT 1490
-1 DEAT
-2 DATE BEF 10 FEB 1561
-1 FAMS @F8@
-0 @I25@ INDI
 1 NAME Richard /Shakespeare/
 2 GIVN Richard
 2 SURN Shakespeare
@@ -306,7 +296,17 @@
 2 DATE MAR 1574
 1 DEAT
 2 DATE FEB 1613
-1 FAMC @F10@
+1 FAMC @F0@
+0 @I25@ INDI
+1 NAME Richard /Shakespeare/
+2 GIVN Richard
+2 SURN Shakespeare
+1 SEX M
+1 BIRT
+2 DATE ABT 1490
+1 DEAT
+2 DATE BEF 10 FEB 1561
+1 FAMS @F2@
 0 @I26@ INDI
 1 NAME Susanna /Shakespeare/
 2 GIVN Susanna
@@ -322,7 +322,7 @@
 2 DATE 26 MAY 1583
 2 PLAC Stratford-upon-Avon
 1 FAMS @F5@
-1 FAMC @F9@
+1 FAMC @F1@
 0 @I27@ INDI
 1 NAME William /Shakespeare/
 2 GIVN William
@@ -337,19 +337,19 @@
 1 BIRT
 2 DATE BEF 23 APR 1564
 2 PLAC Stratford-upon-Avon
-1 FAMS @F9@
-1 FAMC @F10@
+1 FAMS @F1@
+1 FAMC @F0@
 0 @I28@ INDI
 1 NAME  /Unknown/
 2 SURN Unknown
 1 SEX F
-1 FAMS @F8@
+1 FAMS @F2@
 0 @I29@ INDI
 1 NAME Agnes /Webbe/
 2 GIVN Agnes
 2 SURN Webbe
 1 SEX F
-1 FAMS @F6@
+1 FAMS @F4@
 0 @I30@ INDI
 1 NAME Margaret /Wheeler/
 2 GIVN Margaret
@@ -359,64 +359,8 @@
 2 DATE 15 MAR 1616
 1 DEAT
 2 PLAC Died in childbirth
-1 FAMS @F0@
+1 FAMS @F10@
 0 @F0@ FAM
-1 WIFE @I30@
-1 HUSB @I12@
-1 MARR
-2 PLAC Unmarried
-1 CHIL @I8@
-0 @F1@ FAM
-1 WIFE @F1@
-1 HUSB @I6@
-1 CHIL @I5@
-0 @F2@ FAM
-1 WIFE @I22@
-1 HUSB @I12@
-1 MARR
-2 DATE 10 FEB 1616
-2 PLAC Stratford-upon-Avon
-1 CHIL @I9@
-1 CHIL @I10@
-1 CHIL @I11@
-0 @F3@ FAM
-1 WIFE @I15@
-1 HUSB @I3@
-1 MARR
-2 DATE 1649
-0 @F4@ FAM
-1 WIFE @I15@
-1 HUSB @I7@
-1 MARR
-2 DATE 1626
-0 @F5@ FAM
-1 WIFE @I26@
-1 HUSB @I4@
-1 MARR
-2 DATE 05 JUN 1607
-2 PLAC Stratford-upon-Avon
-1 CHIL @I15@
-0 @F6@ FAM
-1 WIFE @I29@
-1 HUSB @I2@
-1 CHIL @I1@
-0 @F7@ FAM
-1 WIFE @I0@
-1 HUSB @I18@
-0 @F8@ FAM
-1 WIFE @I28@
-1 HUSB @I24@
-1 CHIL @I18@
-1 CHIL @I21@
-0 @F9@ FAM
-1 WIFE @I5@
-1 HUSB @I27@
-1 MARR
-2 DATE NOV 1582
-1 CHIL @I17@
-1 CHIL @I22@
-1 CHIL @I26@
-0 @F10@ FAM
 1 WIFE @I1@
 1 HUSB @I21@
 1 MARR
@@ -427,6 +371,61 @@
 1 CHIL @I19@
 1 CHIL @I20@
 1 CHIL @I23@
-1 CHIL @I25@
+1 CHIL @I24@
 1 CHIL @I27@
+0 @F1@ FAM
+1 WIFE @I5@
+1 HUSB @I27@
+1 MARR
+2 DATE NOV 1582
+1 CHIL @I17@
+1 CHIL @I22@
+1 CHIL @I26@
+0 @F2@ FAM
+1 WIFE @I28@
+1 HUSB @I25@
+1 CHIL @I18@
+1 CHIL @I21@
+0 @F3@ FAM
+1 WIFE @I0@
+1 HUSB @I18@
+0 @F4@ FAM
+1 WIFE @I29@
+1 HUSB @I2@
+1 CHIL @I1@
+0 @F5@ FAM
+1 WIFE @I26@
+1 HUSB @I4@
+1 MARR
+2 DATE 05 JUN 1607
+2 PLAC Stratford-upon-Avon
+1 CHIL @I15@
+0 @F6@ FAM
+1 WIFE @I15@
+1 HUSB @I7@
+1 MARR
+2 DATE 1626
+0 @F7@ FAM
+1 WIFE @I15@
+1 HUSB @I3@
+1 MARR
+2 DATE 1649
+0 @F8@ FAM
+1 WIFE @I22@
+1 HUSB @I11@
+1 MARR
+2 DATE 10 FEB 1616
+2 PLAC Stratford-upon-Avon
+1 CHIL @I9@
+1 CHIL @I10@
+1 CHIL @I12@
+0 @F9@ FAM
+1 HUSB @I6@
+1 CHIL @I5@
+0 @F10@ FAM
+1 WIFE @I30@
+1 HUSB @I11@
+1 MARR
+2 PLAC Unmarried
+1 CHIL @I8@
 0 TRLR

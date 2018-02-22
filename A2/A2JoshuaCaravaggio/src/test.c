@@ -153,10 +153,19 @@ int main(int argc,char **argv){
 	if(string!=NULL)printf("%s\n",string);
 	free(string);
 
-	GEDCOMerror error2 = writeGEDCOM("shakespeareWritten.ged", testObject);
+	GEDCOMerror error2 = writeGEDCOM("testFiles/shakespeareWritten.ged", testObject);
 	string = printError(error2);
 	if(string!=NULL)printf("%s\n",string);
 	free(string);
+
+	GEDCOMerror validateError;
+	validateError.type = validateGEDCOM(testObject);
+	validateError.line = -1;
+	string = printError(validateError);
+	if(string!=NULL)printf("Validate: %s\n",string);
+	free(string);
+
+
 
 	/**Individual* testIndividual1 = malloc(sizeof(Individual));
 	
@@ -187,7 +196,10 @@ int main(int argc,char **argv){
 		
 	deleteIndividual(testIndividual1);
 	**/
-	
+		
+
+
+
 	deleteGEDCOM(testObject);
 		
 	

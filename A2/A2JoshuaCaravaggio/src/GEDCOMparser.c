@@ -502,6 +502,7 @@ GEDCOMerror createGEDCOM(char* fileName, GEDCOMobject** obj){
 	for(i = 0; i<lineCounter; i++){
 		deleteGEDCOMLine(fileLines[i]);
 	}
+
 	for(i = 0; i<referenceCounter; i++){
 				
 		free(referenceArray[i]->ref_ID);
@@ -812,7 +813,7 @@ Individual* findPerson(const GEDCOMobject* familyRecord, bool (*compare)(const v
 
 List getDescendants(const GEDCOMobject* familyRecord, const Individual* person){
 
-	List descendantList = initializeList(printIndividual, dummyDelete, compareIndividuals);
+	List descendantList = initializeList(printIndividual, clearList, compareIndividuals);
 	
 	if(familyRecord ==NULL || person == NULL){
 		
@@ -836,15 +837,181 @@ GEDCOMerror writeGEDCOM(char* fileName, const GEDCOMobject* obj){
 
 	}
 
+	GEDCOMreference **referenceArray = malloc(sizeof(GEDCOMreference*));
+
+	Node* ptr;
+	char* tempXref = NULL;
+	int indiCounter= 0;
+	int famCounter = 0;
+	int referenceCounter = 0;
+
+	for(ptr = (obj->individuals).head; ptr !=NULL; ptr = ptr->next){
+
+		tempXref = malloc(sizeof(char)*10);
+		sprintf(tempXref,"@I%d@", indiCounter);
+		indiCounter++;
+		referenceCounter++;
+		referenceArray = realloc(referenceArray, sizeof(GEDCOMreference*) * (referenceCounter +1));	
+		referenceArray[referenceCounter-1] = createReference(tempXref, (Individual*)(ptr->data));
+		free(tempXref);
+
+	}
+
+	for(ptr = (obj->families).head; ptr !=NULL; ptr = ptr->next){
+
+		tempXref = malloc(sizeof(char)*10);
+		sprintf(tempXref,"@F%d@", famCounter);
+		famCounter++;
+		referenceCounter++;
+		referenceArray = realloc(referenceArray, sizeof(GEDCOMreference*) * (referenceCounter +1));	
+		referenceArray[referenceCounter-1] = createReference(tempXref, (Family*)(ptr->data));	
+		free(tempXref);
+
+	}
+
 	FILE * fp = fopen(fileName, "w");
 	writeHeader(fp, obj->header);
 	writeSubmitter(fp, obj->submitter);
 
+	for(ptr = (obj->individuals).head; ptr !=NULL; ptr = ptr->next ){
+			
+		error = writeIndividual(fp,(Individual*)(ptr->data), referenceArray, referenceCounter);
+		if(error.type!=OK){
+
+			error.type = WRITE_ERROR;			
+			error.line = -1;
+			return error;
+		}
+	}
+
+	for(ptr = (obj->families).head; ptr !=NULL; ptr = ptr->next){
+			
+		error = writeFamily(fp,(Family*)(ptr->data), referenceArray, referenceCounter);
+		if(error.type!=OK){
+			error.type = WRITE_ERROR;
+			error.line = -1;
+			return error;
+		}
+
+	}
+	for(int i = 0; i<referenceCounter; i++){
+
+		free(referenceArray[i]->ref_ID);
+		referenceArray[i]->data = NULL;
+		free(referenceArray[i]);
+		
+	}
+	fprintf(fp, "0 TRLR\n");
+	free(referenceArray);
 	error.type = OK;
 	error.line = -1;
 	fclose(fp);
 	return error;
 }
+ErrorCode validateGEDCOM(const GEDCOMobject* obj){
+
+
+	if(obj == NULL){
+
+		return  INV_GEDCOM;
+	}
+
+	if(obj->header == NULL || obj->submitter == NULL){
+
+		return  INV_GEDCOM;
+
+	}
+
+	Header* header = obj->header;
+
+	if(header->submitter ==NULL){
+
+
+		return  INV_HEADER;
+
+	}
+
+	if(strlen(header->source)>200){
+
+		printf("Header->source length >200\n");
+		return INV_RECORD;
+
+	}
+
+	Individual* tempIndi;
+
+	for(Node* ptr = (obj->individuals).head; ptr!=NULL; ptr = ptr->next){
+
+		tempIndi = (Individual*)(ptr->data);
+
+		if(tempIndi == NULL){
+
+		printf("Individual NULL\n");
+		
+			return INV_RECORD;
+
+		}
+
+		if(strlen(tempIndi->givenName)>120 || strlen(tempIndi->surname)>120){
+	
+			printf("Individual name exceeds max length\n");
+
+			return INV_RECORD;			
+
+		}
+
+	}
+
+	Family* tempFamily;
+
+	for(Node* ptr = (obj->families).head; ptr!=NULL; ptr = ptr->next){
+
+		tempFamily = (Family*)(ptr->data);
+
+		if(tempFamily == NULL ){
+
+			printf("Family NULL \n");
+		
+			return INV_RECORD;			
+
+		}
+
+		
+		for(Node* ptr2 = (tempFamily->children).head; ptr2!=NULL; ptr2 = ptr2->next){
+
+			tempIndi = (Individual*)(ptr2->data);
+			if(tempIndi == NULL){
+
+			printf("Child NULL \n");
+
+			return INV_RECORD;			
+
+
+			}
+
+
+		}
+
+	}
+
+	return OK;			
+
+
+
+}
+
+List getDescendantListN(const GEDCOMobject* familyRecord, const Individual* person, unsigned int maxGen){
+
+	List descendantListN = initializeList(printIndividualList, dummyDelete ,compareIndividualsLists );
+
+	List firstGeneration = initializeList(printIndividual, dummyDelete, compareIndividuals);
+	insertFront(&descendantListN,&firstGeneration);
+	recursivelyAddDescendantsN(&descendantListN, person, 0 , maxGen);
+
+	return descendantListN;
+}
+
+
 
 //***********************************************************************************************************
 
@@ -1004,7 +1171,7 @@ char* printIndividual(void* toBePrinted){
 	strcat(individualInfo,"\n");	
 	ptr = (individual->events).head;		
 	individualInfo = realloc(individualInfo,sizeof(char)* (currentLength+20));						
-	strcat(individualInfo,"\nEvents\n");
+	strcat(individualInfo,"\nEvents\n"); 
 	currentLength = strlen(individualInfo);	
 			
 	while(ptr!=NULL){
@@ -1871,6 +2038,7 @@ Field *createField(GEDCOMLine* line){
 	}else{
 		
 		strcpy(newField->tag, " ");
+
 	}
 	
 	if(line->value!=NULL){
@@ -2025,6 +2193,10 @@ Individual* createIndividual(GEDCOMLine ** record, int numLines){
 			free(currentEvent);		
 			return individual;
 								
+		}else if(strcmp(record[i]->tag, "GIVN")==0||strcmp(record[i]->tag, "SURN")==0){
+
+			insertSorted(&(individual->otherFields), createField(record[i]));			
+
 		}else if(strcmp(record[i]->tag, "NAME")==0){
 
 			if(record[i]->value == NULL ){
@@ -2038,7 +2210,7 @@ Individual* createIndividual(GEDCOMLine ** record, int numLines){
 				
 				if(token!=NULL){
 					
-					token[strlen(token)-1] = '\0';
+					if(token[strlen(token)-1]==' ')token[strlen(token)-1] = '\0';
 					strcpy(individual->givenName, token);	
 					
 					
@@ -2053,6 +2225,7 @@ Individual* createIndividual(GEDCOMLine ** record, int numLines){
 					
 				}
 			}
+
 	
 		}else if(record[i]->level == 1 && (record[i]->value == NULL || strcmp(record[i]->value, "Y")==0) ) {
 			
@@ -2341,22 +2514,7 @@ char* printEncoding(CharSet encoding){
 	
 	
 }
-/**
-bool testCompare(const void *first, const void *second){
 
-	Individual* indi1 = (Individual*)first;
-	Individual* indi2 = (Individual*)second;
-		
-	if(compareIndividuals(indi1, indi2)==0){
-		return true;
-		
-	}else{
-		
-		return false;
-		
-	}
-		
-}**/
 
 void recursivelyAddDescendants(List *descendantList, const Individual* currentPerson){
 	
@@ -2420,7 +2578,7 @@ GEDCOMerror writeHeader(FILE * fp, Header* header){
 	fprintf(fp,"1 VERS ");	
 	fprintf(fp,"%.1f\n", header->gedcVersion);
 	fprintf(fp,"1 FORM LINEAGE-LINKED\n");		
-
+	fprintf(fp, "1 SUBM @SUB1@\n");
 	error.type = OK;
 	error.line = -1;
 	return error;
@@ -2438,7 +2596,7 @@ GEDCOMerror writeSubmitter(FILE * fp, Submitter* submitter){
 	}
 	char* tempString = NULL;
 							
-	fprintf(fp, "0 SUBM\n");
+	fprintf(fp, "0 @SUB1@ SUBM\n");
 	tempString = submitter->submitterName;		
 	
 	if(tempString!=NULL){			
@@ -2457,7 +2615,6 @@ GEDCOMerror writeSubmitter(FILE * fp, Submitter* submitter){
 		fprintf(fp, "%s\n", token);
 
 		while((token = strtok(NULL, "\n"))!= NULL){
-
 			fprintf(fp, "2 CONT %s\n", token);
 		}
 		
@@ -2467,4 +2624,361 @@ GEDCOMerror writeSubmitter(FILE * fp, Submitter* submitter){
 	error.line = -1;
 	return error;
 	
+}
+
+
+GEDCOMerror writeIndividual(FILE * fp, Individual* individual,GEDCOMreference ** referenceArray, int referenceCount){
+
+	GEDCOMerror error;
+	Node* ptr;
+	char* xref = malloc(sizeof(char)*10);
+
+	if(individual == NULL || fp == NULL){
+		error.type = WRITE_ERROR;
+		error.line = -1;
+		return error;
+
+	}
+
+
+	for(int i =0; i<referenceCount; i++){
+		if(referenceArray[i]->data == individual){
+			strcpy(xref, referenceArray[i]->ref_ID);
+		}
+
+
+	}
+
+
+	char* tempString = NULL;
+							
+	fprintf(fp, "0 %s INDI\n", xref);
+	tempString = individual->givenName;		
+	
+	if(tempString!=NULL){			
+
+		fprintf(fp, "1 NAME ");
+		fprintf(fp,"%s",tempString);
+		
+	}
+
+	tempString = individual->surname;		
+	
+	if(tempString!=NULL && strcmp(tempString,"")!=0){			
+		fprintf(fp," /%s/",tempString);
+		
+	}
+	fprintf(fp, "\n");
+
+	tempString = individual->givenName;		
+
+	if(tempString!=NULL && strcmp(tempString,"")!=0){			
+		fprintf(fp,"2 GIVN %s\n",tempString);
+		
+	}
+	tempString = individual->surname;		
+
+	if(tempString!=NULL && strcmp(tempString,"")!=0){			
+		fprintf(fp,"2 SURN %s\n",tempString);
+		
+	}
+
+	for(ptr = (individual->otherFields).head; ptr!= NULL; ptr = ptr->next){
+
+
+		Field* tempField = (Field*)(ptr->data);
+		if(!(strcmp(tempField->tag, "GIVN")==0 ||strcmp(tempField->tag, "SURN")==0)){
+			
+			fprintf(fp, "1 %s %s\n",tempField->tag, tempField->value );
+		}
+
+	}
+
+	Event* tempEvent;
+
+	for(ptr = (individual->events).head; ptr!= NULL; ptr = ptr->next){
+
+		tempEvent = (Event*)(ptr->data);
+		error = writeEvent(fp, tempEvent);
+
+		if(error.type!=OK){
+			free(xref);
+			error.line = -1;
+			error.type = WRITE_ERROR;
+			return error;			
+		}
+
+	}	
+	for(ptr = (individual->families).head; ptr!=NULL; ptr= ptr->next){
+
+		for(int i =0; i<referenceCount; i++){
+			if(referenceArray[i]->data == (Family*)(ptr->data)){				
+
+				if(isChild((Family*)(ptr->data), individual)){
+					fprintf(fp, "1 FAMC %s\n", referenceArray[i]->ref_ID);
+					
+				}else{
+					fprintf(fp, "1 FAMS %s\n", referenceArray[i]->ref_ID);
+					
+
+				}
+			}
+
+		}
+
+	}
+
+	free(xref);
+	error.type = OK;
+	error.line = -1;
+	return error;
+
+}
+
+GEDCOMerror writeFamily(FILE * fp, Family* family,GEDCOMreference ** referenceArray, int referenceCount){
+
+	GEDCOMerror error;
+	Node* ptr;
+	char* xref = malloc(sizeof(char)*10);
+
+	if(family == NULL || fp == NULL){
+		error.type = WRITE_ERROR;
+		error.line = -1;
+		return error;
+
+	}
+
+
+	for(int i =0; i<referenceCount; i++){
+		if(referenceArray[i]->data == family){
+			strcpy(xref, referenceArray[i]->ref_ID);
+		}
+
+	}
+
+						
+	fprintf(fp, "0 %s FAM\n", xref);
+
+	free(xref);
+	xref = NULL;
+	Individual* tempIndi = family->wife;
+
+	if(tempIndi!=NULL){
+
+		for(int i =0; i<referenceCount; i++){
+			if(referenceArray[i]->data == tempIndi){
+				xref = malloc(sizeof(char)* 10);			
+				strcpy(xref, referenceArray[i]->ref_ID);
+			}
+
+		}
+
+	}	
+
+
+	if(xref!=NULL){			
+
+		fprintf(fp, "1 WIFE %s\n", xref);
+		free(xref);
+	}
+
+	xref = NULL;
+	tempIndi = family->husband;
+	if(tempIndi!=NULL){
+
+		for(int i =0; i<referenceCount; i++){
+			if(referenceArray[i]->data == tempIndi){
+
+				xref = malloc(sizeof(char)* 10);						
+				strcpy(xref, referenceArray[i]->ref_ID);
+			}
+
+		}
+
+	}	
+
+	if(xref!=NULL){			
+
+		fprintf(fp, "1 HUSB %s\n", xref);
+		free(xref);
+		xref = malloc(sizeof(char)* 10);
+	}
+
+	Event* tempEvent;
+
+	for(ptr = (family->events).head; ptr!= NULL; ptr = ptr->next){
+
+		tempEvent = (Event*)(ptr->data);
+		error = writeEvent(fp, tempEvent);
+
+		if(error.type!=OK){
+			free(xref);
+			error.line = -1;
+			error.type = WRITE_ERROR;
+			return error;			
+		}
+
+	}	
+	for(ptr = (family->children).head; ptr!= NULL; ptr = ptr->next){
+
+		tempIndi = (Individual*)(ptr->data);
+
+		for(int i =0; i<referenceCount; i++){
+			if(referenceArray[i]->data == tempIndi){
+				strcpy(xref, referenceArray[i]->ref_ID);
+			}
+
+		}
+		if(xref!=NULL){			
+
+		fprintf(fp, "1 CHIL %s\n", xref);
+		free(xref);
+		xref = malloc(sizeof(char)* 10);
+	}
+
+	}
+
+
+	free(xref);
+	error.type = OK;
+	error.line = -1;
+	return error;
+
+}
+
+GEDCOMerror writeEvent(FILE * fp, Event* event){
+
+	GEDCOMerror error;
+
+	if(event == NULL || fp == NULL){
+		error.type = WRITE_ERROR;
+		error.line = -1;
+		return error;
+
+	}
+
+	char* tempString = NULL;
+	tempString = event->type;
+
+					
+	if((event->date!=NULL || strcmp(event->date,"")==0)&&(event->place!=NULL || strcmp(event->place,"")==0)){
+		fprintf(fp, "1 %s\n", tempString);
+	}else{
+		fprintf(fp, "1 %s Y\n", tempString);		
+	}
+
+	tempString = event->date;		
+	
+	if(tempString!=NULL && strcmp(tempString,"")!=0){			
+
+		fprintf(fp, "2 DATE ");
+		fprintf(fp,"%s\n",tempString);
+		
+	}
+	tempString = event->place;		
+	
+	if(tempString!=NULL&& strcmp(tempString,"")!=0){			
+
+		fprintf(fp, "2 PLAC ");
+		fprintf(fp,"%s\n",tempString);
+		
+	}
+	
+	error.type = OK;
+	error.line = -1;
+	return error;
+
+}
+bool isChild(Family* family, Individual* individual){
+
+
+	for(Node* ptr = (family->children).head; ptr!=NULL; ptr = ptr->next){
+		if(compareIndividuals(individual, (Individual*)(ptr->data))==0){
+			return true;
+		}
+
+	}
+	return false;
+}
+
+int compareIndividualsLists(const void* first,const void* second){
+	return -1;
+}
+
+char* printIndividualList(void* toBePrinted){
+	
+
+	List* list = (List*)toBePrinted;
+	
+	if(list == NULL){
+		return NULL;
+	}
+
+	char* listString = calloc(sizeof(char),2);	
+
+	Node* ptr1 = list->head;
+	char* tempString;
+	int currentLength = 0;
+	strcpy("", listString);
+	Individual* individual;
+	while(ptr1!=NULL){
+		
+		individual = (Individual*)(ptr1->data);	
+		listString = realloc(listString,sizeof(char)* (currentLength+ 30 ));			
+		tempString = printIndividual(individual);
+		currentLength  = strlen(listString);
+		listString = realloc(listString,sizeof(char)* (currentLength+strlen(tempString) +1));			
+		strcat(listString, tempString);
+		free(tempString);		
+		currentLength = strlen(listString);		
+		ptr1 = ptr1->next;
+	}
+	return listString;
+
+}
+void recursivelyAddDescendantsN(List *descendantList, const Individual* currentPerson, int counter,int  maxGen){
+
+	Family* tempFam;
+	Individual* tempIndi;
+	Node* ptr1;
+	Node* ptr2;
+	int i = 0;
+	ptr1 = descendantList->head;
+
+	while( ptr1!=NULL && i < maxGen ){
+
+		ptr1 = ptr1->next;
+
+	}		
+
+	for(ptr1 = (currentPerson->families).head; ptr1!=NULL; ptr1 = ptr1->next){
+		
+		tempFam = (Family*)ptr1->data;
+
+		if(tempFam->wife == currentPerson|| tempFam->husband == currentPerson){
+
+			for(ptr2 = (tempFam->children).head; ptr2!=NULL; ptr2 = ptr2->next){
+				
+				tempIndi = (Individual*)(ptr2->data);
+
+				if(listContains())
+			}
+
+		}
+
+	}
+
+
+}
+
+bool listContains(List* list, void* target ){
+
+	for(Node* ptr = list->head; ptr!=NULL; ptr = ptr->next){
+		if(ptr->data == target){
+			return true;
+		}
+
+	}
+	return false;
+
 }
