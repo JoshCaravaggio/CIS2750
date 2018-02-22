@@ -2930,7 +2930,7 @@ void deleteIndividualList(void * toBeDeleted){
 	
 	list->head = NULL;
 	list->tail = NULL;
-
+	free(toBeDeleted);
 }
 int compareIndividualsLists(const void* first,const void* second){
 	return -1;
@@ -2987,7 +2987,6 @@ void recursivelyAddDescendantsN(List *descendantList,List * currentGeneration ,c
 
 				if(!(listContains(currentGeneration, tempIndi))){
 
-					printf("Adding %s %s to generation %d\n", tempIndi->givenName, tempIndi->surname, counter+1);
 					insertSorted(currentGeneration, tempIndi);
 
 				}
