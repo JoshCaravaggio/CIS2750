@@ -179,7 +179,9 @@ int main(int argc,char **argv){
 
 		for(Node* ptr = testList->head; ptr !=NULL; ptr = ptr->next){
 			Individual* indi = (Individual*)ptr->data;
-			printf("%s %s\n", indi->givenName, indi->surname);
+			string = indToJSON(indi);
+			printf("%s\n",string );
+			free(string);
 		}
 	}
 

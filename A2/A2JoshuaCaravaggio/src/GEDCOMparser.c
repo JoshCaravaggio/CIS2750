@@ -1038,7 +1038,40 @@ List getAncestorListN(const GEDCOMobject* familyRecord, const Individual* person
 	return ancestorListN;
 }
 
+char* indToJSON(const Individual* ind){
 
+	char* JSONstring;
+	int currentLength = 0;
+	JSONstring = calloc(sizeof(char), 2);	
+
+	if(ind == NULL){	
+		strcpy( JSONstring,"");		
+		return JSONstring;
+	}
+
+	JSONstring = realloc(JSONstring, sizeof(char)*140);
+	strcpy(JSONstring,"\"{\"givenName\":\"");
+	if(ind->givenName!=NULL){
+		strcat( JSONstring, ind->givenName);
+	}else{
+		strcat( JSONstring, "\"");		
+	}
+
+	currentLength = strlen(JSONstring);
+	JSONstring = realloc(JSONstring, sizeof(char)*(currentLength + 140));
+	strcat(JSONstring, "\",\"surname\":\"");
+
+	if(ind->surname!=NULL){
+		strcat(JSONstring, ind->surname);
+	}else{
+		strcat(JSONstring,"\"");		
+	}	
+	currentLength = strlen(JSONstring);
+	JSONstring = realloc(JSONstring, sizeof(char)*(currentLength + 10));
+	strcat( JSONstring, "\"}\"");		
+	return JSONstring;
+
+}
 
 
 //***********************************************************************************************************
