@@ -164,7 +164,6 @@ int main(int argc,char **argv){
 	string = printError(validateError);
 	if(string!=NULL)printf("Validate: %s\n",string);
 	free(string);
-
 	Node* ptr = (testObject->individuals).tail;
 	ptr = ptr->previous->previous->previous;
 
@@ -181,6 +180,15 @@ int main(int argc,char **argv){
 			Individual* indi = (Individual*)ptr->data;
 			string = indToJSON(indi);
 			printf("%s\n",string );
+			Individual* tempIndi = JSONtoInd(string);
+			free(string);
+			if(tempIndi !=NULL){
+	
+				string = printIndividual(tempIndi);
+				printf("%s\n",string );
+							
+				deleteIndividual(tempIndi);	
+			}	
 			free(string);
 		}
 	}

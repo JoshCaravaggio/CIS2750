@@ -1073,6 +1073,69 @@ char* indToJSON(const Individual* ind){
 
 }
 
+Individual* JSONtoInd(const char* str){
+
+	if(str == NULL){
+		return NULL;
+
+	}
+
+	int totalLength = strlen(str);
+	printf("String: %s\nTotal Length of %d\n", str, totalLength);
+	char* tempString = calloc(sizeof(char), totalLength+1);
+	strcpy(tempString, str);
+
+	Individual* newInd = malloc(sizeof(Individual));
+	newInd->events = initializeList(printEvent, deleteEvent, compareEvents);
+	newInd->otherFields = initializeList(printField, deleteField, compareFields);	
+	newInd->families = initializeList(printFamily, dummyDelete, compareFamilies);	
+	char* token = strtok(tempString, ":");
+
+	if(strcmp(token, "\"{\"givenName\"")!=0){
+		printf("Incorrect format for givenName, token: %s\n", token);
+		free(tempString);
+		free(newInd);
+		return NULL;
+	}
+	token = strtok(NULL, ",");
+	newInd->givenName = calloc(sizeof(char),120);
+
+	if(strcmp(token, "\"\"")!=0){
+
+		char* gName = calloc(sizeof(char),120);
+		int nameCounter = 0;
+		for(int i =  0; i<strlen(token);i++){
+			if(token[i]!='\"'){
+				gName[nameCounter++] = token[i];
+			}
+
+		}
+		strcpy(newInd->givenName, gName);
+		free(gName);
+	}else{
+		strcpy(newInd->givenName, "");
+	}
+	printf("Given Name: %s\n", newInd->givenName);
+	token = strtok(NULL, ":");
+
+	if(strcmp(token,"\"surname\"" )!=0){
+
+		printf("Incorrect format for surname, token: %s\n", token);
+		free(tempString);
+		free(newInd->givenName);
+		free(newInd);
+		return NULL;	
+	}
+
+	token = strtok(NULL, "\"");
+	newInd->surname = calloc(sizeof(char),120);
+	strcpy(newInd->surname, token);	
+	printf("Surname: %s\n", newInd->surname);
+	free(tempString);
+	return newInd;
+
+}
+
 
 //***********************************************************************************************************
 
