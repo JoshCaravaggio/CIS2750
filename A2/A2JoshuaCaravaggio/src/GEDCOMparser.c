@@ -16,10 +16,12 @@ GEDCOMerror createGEDCOM(char* fileName, GEDCOMobject** obj){
 	
 	FILE * fp;	
 	GEDCOMerror error;
-	
-	if(validateFileName(fileName)){
+	char* fileNameCopy = calloc(sizeof(char),120);
+	strcpy(fileNameCopy, fileName);
 
-		fp = fopen(fileName, "r");
+	if(validateFileName(fileNameCopy)){
+
+		fp = fopen(fileNameCopy, "r");
 
 		if(fp==NULL){
 
@@ -35,7 +37,7 @@ GEDCOMerror createGEDCOM(char* fileName, GEDCOMobject** obj){
 		return error;
 	}
 		
-
+	free(fileNameCopy);
 	GEDCOMLine ** fileLines = malloc(sizeof(GEDCOMLine*));
 	GEDCOMLine ** currentRecord = malloc(sizeof(GEDCOMLine*));
 	GEDCOMreference **referenceArray = malloc(sizeof(GEDCOMreference*));
@@ -1081,14 +1083,13 @@ Individual* JSONtoInd(const char* str){
 	}
 
 	int totalLength = strlen(str);
-	printf("String: %s\nTotal Length of %d\n", str, totalLength);
 	char* tempString = calloc(sizeof(char), totalLength+1);
 	strcpy(tempString, str);
 
 	Individual* newInd = malloc(sizeof(Individual));
 	newInd->events = initializeList(printEvent, deleteEvent, compareEvents);
 	newInd->otherFields = initializeList(printField, deleteField, compareFields);	
-	newInd->families = initializeList(printFamily, dummyDelete, compareFamilies);	
+	newInd->families = initializeList(printFamily, deleteFamily, compareFamilies);	
 	char* token = strtok(tempString, ":");
 
 	if(strcmp(token, "\"{\"givenName\"")!=0){
@@ -1134,6 +1135,172 @@ Individual* JSONtoInd(const char* str){
 	free(tempString);
 	return newInd;
 
+}
+GEDCOMobject* JSONtoGEDCOM(const char* str){
+
+	if(str == NULL){
+		return NULL;
+
+	}
+
+	int totalLength = strlen(str);
+	char* tempString = calloc(sizeof(char), totalLength+1);
+	strcpy(tempString, str);
+
+	GEDCOMobject* newObj = malloc(sizeof(GEDCOMobject));
+	newObj->header =NULL;
+	newObj->submitter = NULL;
+	newObj->families = initializeList(printFamily, deleteFamily, compareFamilies);	
+	newObj->individuals = initializeList(printIndividual, deleteIndividual, compareIndividuals);
+
+	Header* newHeader = calloc(sizeof(Header),1);
+	Submitter* newSubmitter = calloc(sizeof(Submitter),1);
+	newObj->header = newHeader;
+	newObj->submitter = newSubmitter;
+
+	char* token = strtok(tempString, ":");
+
+	if(strcmp(token, "\"{\"source\"")!=0){
+		printf("Incorrect format for source, token: %s\n", token);
+		free(tempString);
+		deleteGEDCOM(newObj);
+		return NULL;
+	}
+	token = strtok(NULL, ",");
+
+	if(strcmp(token, "\"\"")!=0){
+
+		char* sourceName = calloc(sizeof(char),120);
+		int nameCounter = 0;
+		for(int i =  0; i<strlen(token);i++){
+			if(token[i]!='\"' &&token[i]!='{'&&token[i]!='}'){
+				sourceName[nameCounter++] = token[i];
+			}
+
+		}
+		for(int i = 0; i<strlen(sourceName); i++){
+			newHeader->source[i] = sourceName[i];
+
+		}
+		free(sourceName);
+	}
+
+	printf("Header Source: %s\n", newObj->header->source);
+
+	token = strtok(NULL, ":");
+	if(strcmp(token, "\"gedcVersion\"")!=0){
+		printf("Incorrect format for Version, token: %s\n", token);
+		free(tempString);
+		deleteGEDCOM(newObj);
+		return NULL;
+	}
+	token = strtok(NULL, ",");
+
+	if(strcmp(token, "\"\"")!=0){
+
+		char* versionString = calloc(sizeof(char),10);
+		int versCounter = 0;
+
+		for(int i =  0; i<strlen(token);i++){
+			if(token[i]!='\"' &&token[i]!='{'&&token[i]!='}'){
+				versionString[versCounter++] = token[i];
+			}
+
+		}
+
+		for(int i = 0; i<strlen(versionString); i++){
+			newHeader->gedcVersion = atof(versionString);
+
+		}
+		free(versionString);
+	}
+
+	printf("Header version: %.1f\n", newHeader->gedcVersion );
+	 token = strtok(NULL, ":");
+
+	if(strcmp(token, "\"encoding\"")!=0){
+		printf("Incorrect format for encoding, token: %s\n", token);
+		free(tempString);
+		deleteGEDCOM(newObj);
+		return NULL;
+	}
+	token = strtok(NULL, ",");
+
+	if(strcmp(token, "\"\"")!=0){
+
+		char* encodingString = calloc(sizeof(char),120);
+		int enCounter = 0;
+		for(int i =  0; i<strlen(token);i++){
+			if(token[i]!='\"' &&token[i]!='{'&&token[i]!='}'){
+				encodingString[enCounter++] = token[i];
+			}
+
+		}
+
+			newHeader->encoding = decodeCharSet(encodingString);
+
+		free(encodingString);
+	}
+	printf("Header Encoding: %s\n",encodeCharSet(newHeader->encoding) );
+	 token = strtok(NULL, ":");
+
+	if(strcmp(token, "\"subName\"")!=0){
+		printf("Incorrect format for submitter name, token: %s\n", token);
+		free(tempString);
+		deleteGEDCOM(newObj);
+		return NULL;
+	}
+	token = strtok(NULL, ",");
+
+	if(strcmp(token, "\"\"")!=0){
+
+		char* subName = calloc(sizeof(char),120);
+		int nameCounter = 0;
+		for(int i =  0; i<strlen(token);i++){
+			if(token[i]!='\"' &&token[i]!='{'&&token[i]!='}'){
+				subName[nameCounter++] = token[i];
+			}
+
+		}
+		for(int i = 0; i<strlen(subName); i++){
+			newSubmitter->submitterName[i] = subName[i];
+
+		}
+
+		free(subName);
+	}
+	printf("Submitter Name: %s\n",newSubmitter->submitterName );
+
+	 token = strtok(NULL, ":");
+
+	if(strcmp(token, "\"subName\"")!=0){
+		printf("Incorrect format for submitter address, token: %s\n", token);
+		free(tempString);
+		deleteGEDCOM(newObj);
+		return NULL;
+	}
+	token = strtok(NULL, ",");
+
+	if(strcmp(token, "\"\"")!=0){
+
+		char* subAddr = calloc(sizeof(char),300);
+		int addrCounter = 0;
+		for(int i =  0; i<strlen(token);i++){
+			if(token[i]!='\"' &&token[i]!='{'&&token[i]!='}'){
+				subAddr[addrCounter++] = token[i];
+			}
+
+		}
+		for(int i = 0; i<strlen(subAddr); i++){
+			newSubmitter->address[i] = subAddr[i];
+
+		}
+
+		free(subAddr);
+	}
+	printf("Submitter Address: %s\n",newSubmitter->address );
+			
+	return newObj;
 }
 
 

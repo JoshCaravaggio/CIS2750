@@ -170,7 +170,7 @@ int main(int argc,char **argv){
 	Individual* testIndividual2 = (Individual*)ptr->data;
 	
 
-	List descendantList = getAncestorListN(testObject, testIndividual2,2);
+	List descendantList = getDescendantListN(testObject, testIndividual2,2);
 
 	for(Node * famPtr =  descendantList.head; famPtr!=NULL; famPtr = famPtr->next){
 
@@ -193,6 +193,12 @@ int main(int argc,char **argv){
 		}
 	}
 
+	char* GEDCOMstring = calloc(sizeof(char), 300);
+	strcpy(GEDCOMstring, "\"{\"source\":\"val\",\"gedcVersion\":\"5.5\",\"encoding\":\"ANSEL\",\"subName\":\"val\",\"subAddress\":\"val\"}");
+	GEDCOMobject* newObject = JSONtoGEDCOM(GEDCOMstring);
+	free(GEDCOMstring);
+	writeGEDCOM("testFiles/shakespeareWritten2.ged", newObject);
+	deleteGEDCOM(newObject);
 	clearList(&descendantList);
 	deleteGEDCOM(testObject);
 		

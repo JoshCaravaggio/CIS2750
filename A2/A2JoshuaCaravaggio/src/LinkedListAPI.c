@@ -39,11 +39,11 @@ void clearList(List* list){
     if (list == NULL){
 		return;
 	}
-
+	
 	if (list->head == NULL && list->tail == NULL){
 		return;
 	}
-
+	
 	Node* tmp;
 	
 	while (list->head != NULL){
@@ -247,7 +247,8 @@ void insertSorted(List *list, void *toBeAdded){
 			newNode->previous = currNode->previous;
 			currNode->previous->next = newNode;
 			currNode->previous = newNode;
-		
+	    	list->length = list->length+1;        
+	
 			return;
 		}
 	
@@ -347,5 +348,3 @@ void* findElement(List list, bool (*customCompare)(const void* first,const void*
 	return NULL;
 
 }
-
-
