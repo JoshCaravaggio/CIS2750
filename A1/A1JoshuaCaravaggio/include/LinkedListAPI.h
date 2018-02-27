@@ -13,6 +13,7 @@
 #include <stdbool.h>
 #include <assert.h>
 
+
 /**
  * Node of a linked list. This list is doubly linked, meaning that it has points to both the node immediately in front 
  * of it, as well as the node immediately behind it.

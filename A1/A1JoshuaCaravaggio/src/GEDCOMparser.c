@@ -5,9 +5,10 @@
 #include <stdbool.h>
 #include <ctype.h>
 
+#include "GEDCOMutilities.h"
 #include "LinkedListAPI.h"
 #include "GEDCOMparser.h"
-#include "GEDCOMutilities.h"
+
 
 //***************************************** GEDCOM object functions *****************************************
 
@@ -759,13 +760,8 @@ char* printError(GEDCOMerror err){
 		
 	}else if(code == 5){
 		sprintf(errorMsg, "OTHER_ERROR\n");	
-		
-		
-	}else if(code == 6){
-		sprintf(errorMsg, "ERROR: WRITE_ERROR Line %d\n", lineNum);
-		
 	}
-
+		
 	return errorMsg;
 	
 	
@@ -2183,7 +2179,7 @@ Family* createFamily(GEDCOMLine ** record, int numLines){
 	for(i = 0; i< numLines; i++){								
 
 		if((record[i]->level == -1 )||(record[i]->tag == NULL)||(i>0 &&(record[i]->level - record[i-1]->level)>1 )){								
-			printf("Dies because of line error\n");
+		
 			errorField = calloc(sizeof(Field),1);
 			errorField->tag = malloc(sizeof(char) * 10);
 			errorField->value = malloc(sizeof(char) * 10);						
@@ -2321,22 +2317,6 @@ char* printEncoding(CharSet encoding){
 	
 	
 }
-/**
-bool testCompare(const void *first, const void *second){
-
-	Individual* indi1 = (Individual*)first;
-	Individual* indi2 = (Individual*)second;
-		
-	if(compareIndividuals(indi1, indi2)==0){
-		return true;
-		
-	}else{
-		
-		return false;
-		
-	}
-		
-}**/
 
 void recursivelyAddDescendants(List *descendantList, const Individual* currentPerson){
 	
@@ -2367,84 +2347,3 @@ void recursivelyAddDescendants(List *descendantList, const Individual* currentPe
 	
 }
 
-
-
-GEDCOMerror writeHeader(FILE * fp, Header* header){
-
-	GEDCOMerror error;
-	if(header == NULL || fp == NULL){
-		error.type = WRITE_ERROR;
-		error.line = -1;
-		return error;
-
-	}
-	char* tempString = NULL;
-							
-	fprintf(fp, "0 HEAD\n");
-	tempString = header->source;		
-	
-	if(tempString!=NULL){			
-
-		fprintf(fp, "1 SOUR ");
-		fprintf(fp,"%s\n",tempString);
-		
-	}
-	tempString = encodeCharSet(header->encoding);
-	if(tempString!=NULL){			
-
-		fprintf(fp,"1 CHAR ");
-		fprintf(fp, "%s\n", tempString);
-		
-	}
-	fprintf(fp,"1 GEDC\n");
-	fprintf(fp,"1 VERS ");	
-	fprintf(fp,"%.1f\n", header->gedcVersion);
-	fprintf(fp,"1 FORM LINEAGE-LINKED\n");		
-
-	error.type = OK;
-	error.line = -1;
-	return error;
-	
-}
-
-GEDCOMerror writeSubmitter(FILE * fp, Submitter* submitter){
-
-	GEDCOMerror error;
-	if(submitter == NULL || fp == NULL){
-		error.type = WRITE_ERROR;
-		error.line = -1;
-		return error;
-
-	}
-	char* tempString = NULL;
-							
-	fprintf(fp, "0 SUBM\n");
-	tempString = submitter->submitterName;		
-	
-	if(tempString!=NULL){			
-
-		fprintf(fp, "1 NAME ");
-		fprintf(fp,"%s\n",tempString);
-		
-	}
-
-	tempString = submitter->address;
-
-	if(strcmp(tempString,"")!=0){			
-
-		fprintf(fp, "1 ADDR ");
-		char* token = strtok(tempString, "\n");
-		fprintf(fp, "%s\n", token);
-
-		while((token = strtok(NULL, "\n"))!= NULL){
-
-			fprintf(fp, "2 CONT %s\n", token);
-		}
-		
-	}
-
-	error.type = OK;
-	error.line = -1;
-	return error;
-	
-}

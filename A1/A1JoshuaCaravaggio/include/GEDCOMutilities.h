@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <ctype.h>
+
 #include "LinkedListAPI.h"
 #include "GEDCOMparser.h"
 
@@ -243,28 +244,5 @@ bool testCompare(const void *first, const void *second);
  **/
 
 void recursivelyAddDescendants(List *descendantList, const Individual* currentPerson);
-/** Function to write a header to a file stream.
- *@pre Header must exist, file pointer must be opened and non-NULL
- *@post The header is written to the file 
- *@return GEDCOMerror representing success of file write
- *@param pointer to file to be written to
- *@param pointer to header whose information is to be written
- **/
-GEDCOMerror writeHeader(FILE * fp, Header* header);
-/** Function to convert a CharSet enum to a string
- *@pre Header must exist
- *@post A string version of the encoding is returned
- *@return string version of encoding
- *@param CharSet to encode
- **/
-char* encodeCharSet(CharSet toEncode);
-/** Function to write a Submitter to a file stream.
- *@pre Submitter must exist, file pointer must be opened and non-NULL
- *@post The Submitter is written to the file 
- *@return GEDCOMerror representing success of file write
- *@param pointer to file to be written to
- *@param pointer to Submitter whose information is to be written
- **/
-GEDCOMerror writeSubmitter(FILE * fp, Submitter* submitter);
 
 #endif
