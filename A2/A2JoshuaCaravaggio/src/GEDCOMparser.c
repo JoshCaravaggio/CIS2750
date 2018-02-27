@@ -2577,7 +2577,7 @@ Individual* createIndividual(GEDCOMLine ** record, int numLines){
 								
 		}else if(strcmp(record[i]->tag, "GIVN")==0||strcmp(record[i]->tag, "SURN")==0){
 
-			insertSorted(&(individual->otherFields), createField(record[i]));			
+			//insertSorted(&(individual->otherFields), createField(record[i]));			
 
 		}else if(strcmp(record[i]->tag, "NAME")==0){
 

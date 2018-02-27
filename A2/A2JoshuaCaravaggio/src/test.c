@@ -141,7 +141,7 @@ int main(int argc,char **argv){
 **/
 	GEDCOMobject *testObject = NULL; 
 	
-	GEDCOMerror error = createGEDCOM("testFiles/shakespeare.ged", &testObject);
+	GEDCOMerror error = createGEDCOM("testFiles/nuclearFamily.ged", &testObject);
 	
 	char* string = NULL;
 	
