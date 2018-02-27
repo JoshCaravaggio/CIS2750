@@ -247,7 +247,8 @@ void insertSorted(List *list, void *toBeAdded){
 			newNode->previous = currNode->previous;
 			currNode->previous->next = newNode;
 			currNode->previous = newNode;
-		
+	    	list->length = list->length+1;        
+	
 			return;
 		}
 	

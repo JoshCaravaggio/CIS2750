@@ -16,6 +16,12 @@ GEDCOMerror createGEDCOM(char* fileName, GEDCOMobject** obj){
 	
 	FILE * fp;	
 	GEDCOMerror error;
+	if(fileName==NULL){
+
+			error.type = INV_FILE;
+			error.line = -1;
+			return error;		
+	}	
 	char* fileNameCopy = calloc(sizeof(char),120);
 	strcpy(fileNameCopy, fileName);
 
