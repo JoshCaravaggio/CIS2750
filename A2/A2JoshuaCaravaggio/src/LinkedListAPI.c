@@ -69,7 +69,7 @@ void clearList(List* list){
 Node* initializeNode(void* data){
 	Node* tmpNode;
 	
-	tmpNode = (Node*)malloc(sizeof(Node));
+	tmpNode = (Node*)calloc(sizeof(Node),1);
 	
 	if (tmpNode == NULL){
 		return NULL;

@@ -175,7 +175,9 @@ int main(int argc,char **argv){
 	for(Node * famPtr =  descendantList.head; famPtr!=NULL; famPtr = famPtr->next){
 
 		List* testList = (List*)(famPtr->data);
-
+		char* tempString = iListToJSON(*testList);
+		printf("%s\n", tempString);		
+		free(tempString);
 		for(Node* ptr = testList->head; ptr !=NULL; ptr = ptr->next){
 			Individual* indi = (Individual*)ptr->data;
 			string = indToJSON(indi);
@@ -194,9 +196,17 @@ int main(int argc,char **argv){
 	}
 
 	char* GEDCOMstring = calloc(sizeof(char), 300);
-	strcpy(GEDCOMstring, "\"{\"source\":\"val\",\"gedcVersion\":\"5.5\",\"encoding\":\"ANSEL\",\"subName\":\"val\",\"subAddress\":\"val\"}");
+	strcpy(GEDCOMstring, "{\"source\":\"val\",\"gedcVersion\":\"5.5\",\"encoding\":\"ANSEL\",\"subName\":\"val\",\"subAddress\":\"val\"}");
 	GEDCOMobject* newObject = JSONtoGEDCOM(GEDCOMstring);
 	free(GEDCOMstring);
+
+	char* individualString = calloc(sizeof(char), 300);
+	strcpy(individualString, "{\"givenName\":\"joshua\",\"surname\":\"caravagggio\"}");	
+	Individual* testIndi = JSONtoInd(individualString);
+
+	addIndividual(newObject, testIndi);
+
+	free(individualString);
 	writeGEDCOM("testFiles/shakespeareWritten2.ged", newObject);
 	deleteGEDCOM(newObject);
 	clearList(&descendantList);

@@ -7,4 +7,9 @@
 1 SUBM @SUB1@
 0 @SUB1@ SUBM
 1 NAME val
+1 ADDR val
+0 @I0@ INDI
+1 NAME joshua /caravagggio/
+2 GIVN joshua
+2 SURN caravagggio
 0 TRLR

@@ -1052,7 +1052,7 @@ char* indToJSON(const Individual* ind){
 	}
 
 	JSONstring = realloc(JSONstring, sizeof(char)*140);
-	strcpy(JSONstring,"\"{\"givenName\":\"");
+	strcpy(JSONstring,"{\"givenName\":\"");
 	if(ind->givenName!=NULL){
 		strcat( JSONstring, ind->givenName);
 	}else{
@@ -1070,7 +1070,7 @@ char* indToJSON(const Individual* ind){
 	}	
 	currentLength = strlen(JSONstring);
 	JSONstring = realloc(JSONstring, sizeof(char)*(currentLength + 10));
-	strcat( JSONstring, "\"}\"");		
+	strcat( JSONstring, "\"}");		
 	return JSONstring;
 
 }
@@ -1092,7 +1092,7 @@ Individual* JSONtoInd(const char* str){
 	newInd->families = initializeList(printFamily, deleteFamily, compareFamilies);	
 	char* token = strtok(tempString, ":");
 
-	if(strcmp(token, "\"{\"givenName\"")!=0){
+	if(strcmp(token, "{\"givenName\"")!=0){
 		printf("Incorrect format for givenName, token: %s\n", token);
 		free(tempString);
 		free(newInd);
@@ -1154,13 +1154,12 @@ GEDCOMobject* JSONtoGEDCOM(const char* str){
 	newObj->individuals = initializeList(printIndividual, deleteIndividual, compareIndividuals);
 
 	Header* newHeader = calloc(sizeof(Header),1);
-	Submitter* newSubmitter = calloc(sizeof(Submitter),1);
 	newObj->header = newHeader;
-	newObj->submitter = newSubmitter;
+
 
 	char* token = strtok(tempString, ":");
 
-	if(strcmp(token, "\"{\"source\"")!=0){
+	if(strcmp(token, "{\"source\"")!=0){
 		printf("Incorrect format for source, token: %s\n", token);
 		free(tempString);
 		deleteGEDCOM(newObj);
@@ -1242,7 +1241,8 @@ GEDCOMobject* JSONtoGEDCOM(const char* str){
 		free(encodingString);
 	}
 	printf("Header Encoding: %s\n",encodeCharSet(newHeader->encoding) );
-	 token = strtok(NULL, ":");
+
+	token = strtok(NULL, ":");
 
 	if(strcmp(token, "\"subName\"")!=0){
 		printf("Incorrect format for submitter name, token: %s\n", token);
@@ -1251,10 +1251,10 @@ GEDCOMobject* JSONtoGEDCOM(const char* str){
 		return NULL;
 	}
 	token = strtok(NULL, ",");
-
+	char* subName = NULL;
 	if(strcmp(token, "\"\"")!=0){
 
-		char* subName = calloc(sizeof(char),120);
+		subName = calloc(sizeof(char),120);
 		int nameCounter = 0;
 		for(int i =  0; i<strlen(token);i++){
 			if(token[i]!='\"' &&token[i]!='{'&&token[i]!='}'){
@@ -1262,25 +1262,21 @@ GEDCOMobject* JSONtoGEDCOM(const char* str){
 			}
 
 		}
-		for(int i = 0; i<strlen(subName); i++){
-			newSubmitter->submitterName[i] = subName[i];
 
-		}
-
-		free(subName);
 	}
-	printf("Submitter Name: %s\n",newSubmitter->submitterName );
+
 
 	 token = strtok(NULL, ":");
 
-	if(strcmp(token, "\"subName\"")!=0){
+	if(strcmp(token, "\"subAddress\"")!=0){
 		printf("Incorrect format for submitter address, token: %s\n", token);
 		free(tempString);
 		deleteGEDCOM(newObj);
 		return NULL;
 	}
 	token = strtok(NULL, ",");
-
+	Submitter* newSubmitter = NULL;
+	newObj->submitter = newSubmitter;
 	if(strcmp(token, "\"\"")!=0){
 
 		char* subAddr = calloc(sizeof(char),300);
@@ -1290,19 +1286,74 @@ GEDCOMobject* JSONtoGEDCOM(const char* str){
 				subAddr[addrCounter++] = token[i];
 			}
 
-		}
-		for(int i = 0; i<strlen(subAddr); i++){
-			newSubmitter->address[i] = subAddr[i];
+		}	
 
-		}
+		newSubmitter = calloc(sizeof(Submitter)+ sizeof(char)*strlen(subName)+1, 1);
+		newObj->submitter = newSubmitter;
+
+
+		sprintf(newSubmitter->submitterName,"%s", subName);
+
+	
+		free(subName);
+		sprintf(newSubmitter->address,"%s", subAddr);
 
 		free(subAddr);
+		printf("Submitter Name: %s\n",newSubmitter->submitterName );
+		printf("Submitter Address: %s\n",newSubmitter->address );
 	}
-	printf("Submitter Address: %s\n",newSubmitter->address );
-			
+
+	free(tempString);		
 	return newObj;
+
 }
 
+void addIndividual(GEDCOMobject* obj, const Individual* toBeAdded){
+
+	if(obj == NULL || toBeAdded == NULL){
+		return;
+	}
+	insertSorted(&(obj->individuals), (void*)toBeAdded);	
+
+}
+char* iListToJSON(List iList){
+
+	char* JSONString = NULL;
+	char* tempString;
+	int currentLength = 3;
+	if(iList.length == 0){
+
+		JSONString = calloc(sizeof(char),3);
+		strcpy(JSONString, "[]");
+
+		return JSONString;
+
+	}
+
+
+	JSONString = calloc(sizeof(char),3);
+
+	strcpy(JSONString, "[");
+	Individual* tempIndi = NULL;
+	for(Node* ptr = iList.head; ptr!=NULL; ptr= ptr->next){
+
+		tempIndi = (Individual*)ptr->data;
+		tempString = indToJSON(tempIndi);		
+		currentLength = currentLength + strlen(tempString);
+		JSONString = realloc(JSONString, sizeof(char)*currentLength+2);
+		strcat(JSONString, tempString);
+		free(tempString);
+		strcat(JSONString, ",");
+		currentLength = strlen(JSONString);
+
+	}
+	JSONString = realloc(JSONString, sizeof(char)*currentLength+2);
+
+	JSONString[strlen(JSONString)-1] = ']';
+	
+	return JSONString;
+
+}
 
 //***********************************************************************************************************
 
