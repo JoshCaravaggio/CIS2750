@@ -164,6 +164,7 @@ int main(int argc,char **argv){
 	string = printError(validateError);
 	if(string!=NULL)printf("Validate: %s\n",string);
 	free(string);
+
 	Node* ptr = (testObject->individuals).tail;
 	ptr = ptr->previous->previous->previous;
 
@@ -171,13 +172,14 @@ int main(int argc,char **argv){
 	
 
 	List descendantList = getDescendantListN(testObject, testIndividual2,2);
+	char* tempString = gListToJSON((descendantList));
+	printf("%s\n",tempString );
+	free(tempString);
 
 	for(Node * famPtr =  descendantList.head; famPtr!=NULL; famPtr = famPtr->next){
 
 		List* testList = (List*)(famPtr->data);
-		char* tempString = iListToJSON(*testList);
-		printf("%s\n", tempString);		
-		free(tempString);
+
 		for(Node* ptr = testList->head; ptr !=NULL; ptr = ptr->next){
 			Individual* indi = (Individual*)ptr->data;
 			string = indToJSON(indi);
@@ -194,6 +196,7 @@ int main(int argc,char **argv){
 			free(string);
 		}
 	}
+	
 
 	char* GEDCOMstring = calloc(sizeof(char), 300);
 	strcpy(GEDCOMstring, "{\"source\":\"val\",\"gedcVersion\":\"5.5\",\"encoding\":\"ANSEL\",\"subName\":\"val\",\"subAddress\":\"val\"}");

@@ -1354,6 +1354,47 @@ char* iListToJSON(List iList){
 	return JSONString;
 
 }
+char* gListToJSON(List gList){
+
+
+	char* JSONString = NULL;
+	char* tempString;
+	int currentLength = 3;
+	if(gList.length == 0){
+
+		JSONString = calloc(sizeof(char),3);
+		strcpy(JSONString, "[]");
+
+		return JSONString;
+
+	}
+
+
+	JSONString = calloc(sizeof(char),3);
+
+	strcpy(JSONString, "[");
+	List* tempList = NULL;
+	for(Node* ptr = gList.head; ptr!=NULL; ptr= ptr->next){
+
+		tempList = (List*)ptr->data;
+		tempString = iListToJSON(*(tempList));		
+		currentLength = currentLength + strlen(tempString);
+		JSONString = realloc(JSONString, sizeof(char)*currentLength+2);
+		strcat(JSONString, tempString);
+		free(tempString);
+		strcat(JSONString, ",");
+		currentLength = strlen(JSONString);
+
+	}
+	JSONString = realloc(JSONString, sizeof(char)*currentLength+2);
+
+	JSONString[strlen(JSONString)-1] = ']';
+	
+	return JSONString;
+
+
+
+}
 
 //***********************************************************************************************************
 
