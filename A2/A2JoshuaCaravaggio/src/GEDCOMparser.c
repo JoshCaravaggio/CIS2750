@@ -780,6 +780,29 @@ char* printError(GEDCOMerror err){
 	
 }
 
+bool bool_compareInd(const void* first, const void* second){
+
+	Individual* individual1 = (Individual*)first;
+	Individual* individual2 = (Individual*)second;	
+	char* individual1Info = malloc(sizeof(char)*240);
+	char* individual2Info = malloc(sizeof(char)*240);	
+	strcpy(individual1Info, individual1->surname);
+	strcat(individual1Info,",");
+	strcat(individual1Info,individual1->givenName);
+	strcpy(individual2Info, individual2->surname);
+	strcat(individual2Info,",");
+	strcat(individual2Info,individual2->givenName);
+	int comparison = strcmp(individual1Info,individual2Info);
+	free(individual1Info);
+	free(individual2Info);
+	if(comparison == 0){
+		return true;
+	}
+	return false;	
+
+}
+
+
 
 Individual* findPerson(const GEDCOMobject* familyRecord, bool (*compare)(const void* first, const void* second), const void* person){
 	
@@ -931,17 +954,20 @@ ErrorCode validateGEDCOM(const GEDCOMobject* obj){
 	}
 
 	Header* header = obj->header;
-
-	if(header->submitter ==NULL){
-
+	Submitter* submitter = obj->submitter;
+	if(header->submitter ==NULL || header->source[0] == '\0'){
 
 		return  INV_HEADER;
 
 	}
 
+	if(submitter->submitterName[0] == '\0'){
+		
+		return INV_RECORD;
+
+	}
 	if(strlen(header->source)>200){
 
-		printf("Header->source length >200\n");
 		return INV_RECORD;
 
 	}
@@ -954,7 +980,6 @@ ErrorCode validateGEDCOM(const GEDCOMobject* obj){
 
 		if(tempIndi == NULL){
 
-		printf("Individual NULL\n");
 		
 			return INV_RECORD;
 
@@ -962,7 +987,6 @@ ErrorCode validateGEDCOM(const GEDCOMobject* obj){
 
 		if(strlen(tempIndi->givenName)>120 || strlen(tempIndi->surname)>120){
 	
-			printf("Individual name exceeds max length\n");
 
 			return INV_RECORD;			
 
@@ -978,7 +1002,6 @@ ErrorCode validateGEDCOM(const GEDCOMobject* obj){
 
 		if(tempFamily == NULL ){
 
-			printf("Family NULL \n");
 		
 			return INV_RECORD;			
 
@@ -990,7 +1013,6 @@ ErrorCode validateGEDCOM(const GEDCOMobject* obj){
 			tempIndi = (Individual*)(ptr2->data);
 			if(tempIndi == NULL){
 
-			printf("Child NULL \n");
 
 			return INV_RECORD;			
 
@@ -1010,7 +1032,15 @@ ErrorCode validateGEDCOM(const GEDCOMobject* obj){
 
 List getDescendantListN(const GEDCOMobject* familyRecord, const Individual* person, unsigned int maxGen){
 
-	List descendantListN = initializeList(printIndividualList, deleteIndividualList ,compareIndividualsLists );
+
+	List tempDescendantListN = initializeList(printGeneration, deleteGeneration ,compareGenerations );
+	List descendantListN = initializeList(printGeneration, deleteGeneration ,compareGenerations );
+
+
+	if(person == NULL || familyRecord == NULL){
+		return tempDescendantListN;	
+	}
+
 	char* string = NULL;
 	free(string);
 	List* firstGeneration = calloc(sizeof(List),1);
@@ -1020,16 +1050,37 @@ List getDescendantListN(const GEDCOMobject* familyRecord, const Individual* pers
 	firstGeneration->compare = compareIndividuals;
 	firstGeneration->printData = printIndividual;
 	firstGeneration->length = 0;
+
+
+	insertBack(&tempDescendantListN,firstGeneration);
+	recursivelyAddDescendantsN(&tempDescendantListN, firstGeneration,  person, 1 , maxGen);
+
+	for(Node * node = tempDescendantListN.head; node != NULL; node = node->next){
+
+		List* tempList = (List*)(node->data);
+
+		if(!(isEmpty(tempList))){
+
+			insertBack(&descendantListN,tempList);
+
+		}		
+
+	}
 	
-	insertBack(&descendantListN,firstGeneration);
-	recursivelyAddDescendantsN(&descendantListN, firstGeneration,  person, 1 , maxGen);
 
 	return descendantListN;
 }
 
 List getAncestorListN(const GEDCOMobject* familyRecord, const Individual* person, int maxGen){
 
-	List ancestorListN = initializeList(printIndividualList, deleteIndividualList ,compareIndividualsLists );
+
+	List tempAncestorListN = initializeList(printGeneration, deleteGeneration ,compareGenerations );
+
+	if(person == NULL || familyRecord == NULL){
+		return tempAncestorListN;	
+	}
+
+	List ancestorListN = initializeList(printGeneration, deleteGeneration ,compareGenerations );
 	char* string = NULL;
 	free(string);
 	List* firstGeneration = calloc(sizeof(List),1);
@@ -1040,9 +1091,21 @@ List getAncestorListN(const GEDCOMobject* familyRecord, const Individual* person
 	firstGeneration->printData = printIndividual;
 	firstGeneration->length = 0;
 	
-	insertBack(&ancestorListN,firstGeneration);
-	recursivelyAddAncestorsN(&ancestorListN, firstGeneration,  person, 1 , maxGen);
+	insertBack(&tempAncestorListN,firstGeneration);
+	recursivelyAddAncestorsN(&tempAncestorListN, firstGeneration,  person, 1 , maxGen);
 
+
+	for(Node * node = tempAncestorListN.head; node != NULL; node = node->next){
+
+		List* tempList = (List*)(node->data);
+
+		if(!(isEmpty(tempList))){
+
+			insertBack(&ancestorListN,tempList);
+		}
+
+	}
+	
 	return ancestorListN;
 }
 
@@ -1083,7 +1146,7 @@ char* indToJSON(const Individual* ind){
 
 Individual* JSONtoInd(const char* str){
 
-	if(str == NULL){
+	if(str == NULL || str[0] == '\0'){
 		return NULL;
 
 	}
@@ -1099,7 +1162,6 @@ Individual* JSONtoInd(const char* str){
 	char* token = strtok(tempString, ":");
 
 	if(strcmp(token, "{\"givenName\"")!=0){
-		printf("Incorrect format for givenName, token: %s\n", token);
 		free(tempString);
 		free(newInd);
 		return NULL;
@@ -1122,29 +1184,45 @@ Individual* JSONtoInd(const char* str){
 	}else{
 		strcpy(newInd->givenName, "");
 	}
-	printf("Given Name: %s\n", newInd->givenName);
+	//printf("Given Name: %s\n", newInd->givenName);
 	token = strtok(NULL, ":");
 
 	if(strcmp(token,"\"surname\"" )!=0){
 
-		printf("Incorrect format for surname, token: %s\n", token);
+		//printf("Incorrect format for surname, token: %s\n", token);
 		free(tempString);
 		free(newInd->givenName);
 		free(newInd);
 		return NULL;	
+
 	}
 
-	token = strtok(NULL, "\"");
+	token = strtok(NULL, "}");
 	newInd->surname = calloc(sizeof(char),120);
-	strcpy(newInd->surname, token);	
-	printf("Surname: %s\n", newInd->surname);
+
+	if(strcmp(token, "\"\"")!=0){
+
+		char* sName = calloc(sizeof(char),120);
+		int nameCounter = 0;
+		for(int i =  0; i<strlen(token);i++){
+			if(token[i]!='\"'){
+				sName[nameCounter++] = token[i];
+			}
+
+		}
+		strcpy(newInd->surname, sName);
+		free(sName);
+	}else{
+		strcpy(newInd->surname, "");
+	}
+
 	free(tempString);
 	return newInd;
 
 }
 GEDCOMobject* JSONtoGEDCOM(const char* str){
 
-	if(str == NULL){
+	if(str == NULL || str[0] == '\0'){
 		return NULL;
 
 	}
@@ -1166,7 +1244,7 @@ GEDCOMobject* JSONtoGEDCOM(const char* str){
 	char* token = strtok(tempString, ":");
 
 	if(strcmp(token, "{\"source\"")!=0){
-		printf("Incorrect format for source, token: %s\n", token);
+		//printf("Incorrect format for source, token: %s\n", token);
 		free(tempString);
 		deleteGEDCOM(newObj);
 		return NULL;
@@ -1181,8 +1259,8 @@ GEDCOMobject* JSONtoGEDCOM(const char* str){
 			if(token[i]!='\"' &&token[i]!='{'&&token[i]!='}'){
 				sourceName[nameCounter++] = token[i];
 			}
-
 		}
+
 		for(int i = 0; i<strlen(sourceName); i++){
 			newHeader->source[i] = sourceName[i];
 
@@ -1190,11 +1268,11 @@ GEDCOMobject* JSONtoGEDCOM(const char* str){
 		free(sourceName);
 	}
 
-	printf("Header Source: %s\n", newObj->header->source);
+	//printf("Header Source: %s\n", newObj->header->source);
 
 	token = strtok(NULL, ":");
 	if(strcmp(token, "\"gedcVersion\"")!=0){
-		printf("Incorrect format for Version, token: %s\n", token);
+		//printf("Incorrect format for Version, token: %s\n", token);
 		free(tempString);
 		deleteGEDCOM(newObj);
 		return NULL;
@@ -1220,11 +1298,11 @@ GEDCOMobject* JSONtoGEDCOM(const char* str){
 		free(versionString);
 	}
 
-	printf("Header version: %.1f\n", newHeader->gedcVersion );
+	//printf("Header version: %.1f\n", newHeader->gedcVersion );
 	 token = strtok(NULL, ":");
 
 	if(strcmp(token, "\"encoding\"")!=0){
-		printf("Incorrect format for encoding, token: %s\n", token);
+	//	printf("Incorrect format for encoding, token: %s\n", token);
 		free(tempString);
 		deleteGEDCOM(newObj);
 		return NULL;
@@ -1246,21 +1324,22 @@ GEDCOMobject* JSONtoGEDCOM(const char* str){
 
 		free(encodingString);
 	}
-	printf("Header Encoding: %s\n",encodeCharSet(newHeader->encoding) );
+	//printf("Header Encoding: %s\n",encodeCharSet(newHeader->encoding) );
 
 	token = strtok(NULL, ":");
 
 	if(strcmp(token, "\"subName\"")!=0){
-		printf("Incorrect format for submitter name, token: %s\n", token);
+		//printf("Incorrect format for submitter name, token: %s\n", token);
 		free(tempString);
 		deleteGEDCOM(newObj);
 		return NULL;
 	}
 	token = strtok(NULL, ",");
 	char* subName = NULL;
+	subName = calloc(sizeof(char),120);
 	if(strcmp(token, "\"\"")!=0){
 
-		subName = calloc(sizeof(char),120);
+
 		int nameCounter = 0;
 		for(int i =  0; i<strlen(token);i++){
 			if(token[i]!='\"' &&token[i]!='{'&&token[i]!='}'){
@@ -1272,20 +1351,22 @@ GEDCOMobject* JSONtoGEDCOM(const char* str){
 	}
 
 
-	 token = strtok(NULL, ":");
+	token = strtok(NULL, ":");
 
 	if(strcmp(token, "\"subAddress\"")!=0){
-		printf("Incorrect format for submitter address, token: %s\n", token);
+		//printf("Incorrect format for submitter address, token: %s\n", token);
 		free(tempString);
 		deleteGEDCOM(newObj);
 		return NULL;
 	}
 	token = strtok(NULL, ",");
 	Submitter* newSubmitter = NULL;
-	newObj->submitter = newSubmitter;
+
+
+	char* subAddr = calloc(sizeof(char),300);
 	if(strcmp(token, "\"\"")!=0){
 
-		char* subAddr = calloc(sizeof(char),300);
+
 		int addrCounter = 0;
 		for(int i =  0; i<strlen(token);i++){
 			if(token[i]!='\"' &&token[i]!='{'&&token[i]!='}'){
@@ -1295,21 +1376,16 @@ GEDCOMobject* JSONtoGEDCOM(const char* str){
 		}	
 
 		newSubmitter = calloc(sizeof(Submitter)+ sizeof(char)*strlen(subName)+1, 1);
-		newObj->submitter = newSubmitter;
 
-
-		sprintf(newSubmitter->submitterName,"%s", subName);
-
-	
-		free(subName);
-		sprintf(newSubmitter->address,"%s", subAddr);
-
-		free(subAddr);
-		printf("Submitter Name: %s\n",newSubmitter->submitterName );
-		printf("Submitter Address: %s\n",newSubmitter->address );
 	}
+	newObj->submitter = newSubmitter;	
+	sprintf(newSubmitter->submitterName,"%s", subName);
+	free(subName);
+	sprintf(newSubmitter->address,"%s", subAddr);
+	free(subAddr);	
+	free(tempString);
 
-	free(tempString);		
+	newObj->header->submitter = newSubmitter;
 	return newObj;
 
 }
@@ -3277,7 +3353,7 @@ GEDCOMerror writeEvent(FILE * fp, Event* event){
 	return error;
 
 }
-bool isChild(Family* family, Individual* individual){
+bool isChild(Family* family, const Individual* individual){
 
 
 	for(Node* ptr = (family->children).head; ptr!=NULL; ptr = ptr->next){
@@ -3288,7 +3364,7 @@ bool isChild(Family* family, Individual* individual){
 	}
 	return false;
 }
-void deleteIndividualList(void * toBeDeleted){
+void deleteGeneration(void * toBeDeleted){
 
 	List* list = (List*)toBeDeleted;
     if (list == NULL){
@@ -3296,6 +3372,7 @@ void deleteIndividualList(void * toBeDeleted){
 	}
 
 	if (list->head == NULL && list->tail == NULL){
+		free(toBeDeleted);		
 		return;
 	}
 
@@ -3312,11 +3389,13 @@ void deleteIndividualList(void * toBeDeleted){
 	list->tail = NULL;
 	free(toBeDeleted);
 }
-int compareIndividualsLists(const void* first,const void* second){
-	return -1;
+int compareGenerations(const void* first,const void* second){
+
+	return 1;
+
 }
 
-char* printIndividualList(void* toBePrinted){
+char* printGeneration(void* toBePrinted){
 	
 
 	List* list = (List*)toBePrinted;
@@ -3354,7 +3433,13 @@ void recursivelyAddDescendantsN(List *descendantList,List * currentGeneration ,c
 	Node* ptr1;
 	Node* ptr2;
 
-	
+	//List tempList = initializeList(printGeneration, dummyDelete, compareGenerations);
+
+
+	if(currentPerson->families.head == NULL){
+		return;
+	}
+
 	for(ptr1 = (currentPerson->families).head; ptr1!=NULL; ptr1 = ptr1->next){
 		
 		tempFam = (Family*)ptr1->data;
@@ -3370,14 +3455,15 @@ void recursivelyAddDescendantsN(List *descendantList,List * currentGeneration ,c
 					insertSorted(currentGeneration, tempIndi);
 
 				}
+
 			}
 
 		}
-
 	}
 
-	if((counter< maxGen )||(maxGen == 0 && isEmpty(currentGeneration)==false)){		
 
+	if((counter < maxGen )||(maxGen == 0 && isEmpty(currentGeneration)==false)){		
+	
 		counter++;
 		List* newGeneration = calloc(sizeof(List),1);
 		newGeneration->head = NULL;
@@ -3387,6 +3473,7 @@ void recursivelyAddDescendantsN(List *descendantList,List * currentGeneration ,c
 		newGeneration->printData = printIndividual;
 		newGeneration->length = 0;
 
+		insertBack(descendantList, newGeneration);
 
 		for(ptr1 = currentGeneration->head; ptr1!=NULL; ptr1 = ptr1->next){
 
@@ -3394,13 +3481,6 @@ void recursivelyAddDescendantsN(List *descendantList,List * currentGeneration ,c
 
 		}
 
-		if(isEmpty(newGeneration)){
-			clearList(newGeneration);
-			free(newGeneration);
-		}else{
-			insertSorted(descendantList, newGeneration);
-		}
-		
 	}
 
 }
@@ -3411,11 +3491,15 @@ void recursivelyAddAncestorsN(List *ancestorList,List * currentGeneration ,const
 	Node* ptr1;
 
 	
+	if(currentPerson->families.head == NULL){
+		return;
+	}
+
 	for(ptr1 = (currentPerson->families).head; ptr1!=NULL; ptr1 = ptr1->next){
 		
 		tempFam = (Family*)ptr1->data;
 
-		if(!(tempFam->wife == currentPerson|| tempFam->husband == currentPerson)){
+		if(isChild(tempFam, currentPerson)){
 				
 			tempIndi = tempFam->wife;
 
@@ -3437,7 +3521,7 @@ void recursivelyAddAncestorsN(List *ancestorList,List * currentGeneration ,const
 
 	}
 
-	if((counter< maxGen )||(maxGen == 0 && isEmpty(currentGeneration)==false)){		
+	if((counter < maxGen )||(maxGen == 0 && isEmpty(currentGeneration)== false)){		
 
 		counter++;
 		List* newGeneration = calloc(sizeof(List),1);
@@ -3448,6 +3532,7 @@ void recursivelyAddAncestorsN(List *ancestorList,List * currentGeneration ,const
 		newGeneration->printData = printIndividual;
 		newGeneration->length = 0;
 
+		insertBack(ancestorList, newGeneration);
 
 		for(ptr1 = currentGeneration->head; ptr1!=NULL; ptr1 = ptr1->next){
 
@@ -3455,13 +3540,7 @@ void recursivelyAddAncestorsN(List *ancestorList,List * currentGeneration ,const
 
 		}
 
-		if(isEmpty(newGeneration)){
-			clearList(newGeneration);
-			free(newGeneration);
-		}else{
-			insertSorted(ancestorList, newGeneration);
-		}
-		
+
 	}
 
 }

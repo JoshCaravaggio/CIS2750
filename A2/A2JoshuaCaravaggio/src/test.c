@@ -141,10 +141,10 @@ int main(int argc,char **argv){
 **/
 	GEDCOMobject *testObject = NULL; 
 	
-	GEDCOMerror error = createGEDCOM("testFiles/nuclearFamily.ged", &testObject);
+	GEDCOMerror error = createGEDCOM("testFiles/shakespeare.ged", &testObject);
 	
 	char* string = NULL;
-	
+	/**
 	string = printGEDCOM(testObject);
 
 	if(string!=NULL)printf("%s\n",string);
@@ -167,13 +167,20 @@ int main(int argc,char **argv){
 
 	Node* ptr = (testObject->individuals).tail;
 	ptr = ptr->previous->previous->previous;
+	**/
+	char* tempString = NULL;
+	Individual* testIndividual1 = malloc(sizeof(Individual));
+	testIndividual1->givenName = malloc(sizeof(char)*120);
+	testIndividual1->surname = malloc(sizeof(char)*120);
 
-	Individual* testIndividual2 = (Individual*)ptr->data;
-	
+	strcpy(testIndividual1->givenName, "Mary");
+	strcpy(testIndividual1->surname, "Arden");	
 
-	List descendantList = getDescendantListN(testObject, testIndividual2,2);
-	char* tempString = gListToJSON((descendantList));
-	printf("%s\n",tempString );
+/**	Individual* testIndividual2 = findPerson(testObject, bool_compareInd, testIndividual1);
+
+	List descendantList = getDescendantListN(testObject, testIndividual2,0);
+	tempString = gListToJSON((descendantList));
+	printf("Generation List:%s\n",tempString );
 	free(tempString);
 
 	for(Node * famPtr =  descendantList.head; famPtr!=NULL; famPtr = famPtr->next){
@@ -181,23 +188,20 @@ int main(int argc,char **argv){
 		List* testList = (List*)(famPtr->data);
 
 		for(Node* ptr = testList->head; ptr !=NULL; ptr = ptr->next){
-			Individual* indi = (Individual*)ptr->data;
-			string = indToJSON(indi);
-			printf("%s\n",string );
-			Individual* tempIndi = JSONtoInd(string);
-			free(string);
+			Individual* tempIndi = (Individual*)ptr->data;
+
 			if(tempIndi !=NULL){
-	
-				string = printIndividual(tempIndi);
-				printf("%s\n",string );
-							
-				deleteIndividual(tempIndi);	
+
+				string = tempIndi->givenName;
+				printf("%s ",string );
+				string = tempIndi->surname;
+				printf("%s\n",string );							
+				//deleteIndividual(tempIndi);	
 			}	
-			free(string);
 		}
 	}
 	
-
+	/**
 	char* GEDCOMstring = calloc(sizeof(char), 300);
 	strcpy(GEDCOMstring, "{\"source\":\"val\",\"gedcVersion\":\"5.5\",\"encoding\":\"ANSEL\",\"subName\":\"val\",\"subAddress\":\"val\"}");
 	GEDCOMobject* newObject = JSONtoGEDCOM(GEDCOMstring);
@@ -211,7 +215,9 @@ int main(int argc,char **argv){
 
 	free(individualString);
 	writeGEDCOM("testFiles/shakespeareWritten2.ged", newObject);
-	deleteGEDCOM(newObject);
+	**/
+	deleteIndividual(testIndividual1);
+	//deleteGEDCOM(newObject);
 	clearList(&descendantList);
 	deleteGEDCOM(testObject);
 		

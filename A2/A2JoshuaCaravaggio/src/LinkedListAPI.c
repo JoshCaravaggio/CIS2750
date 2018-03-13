@@ -164,6 +164,8 @@ void* getFromBack(List list){
 
 void* deleteDataFromList(List* list, void* toBeDeleted){
 	if (list == NULL || toBeDeleted == NULL){
+	printf("Returning NULL because list or pointer was NULL\n");
+
 		return NULL;
 	}
 	
@@ -195,7 +197,7 @@ void* deleteDataFromList(List* list, void* toBeDeleted){
 			tmp = tmp->next;
 		}
 	}
-	
+	printf("Returning NULL because data wasn't in list\n");
 	return NULL;
 }
 
