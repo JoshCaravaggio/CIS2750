@@ -320,6 +320,7 @@ int testFunc();
 char* GEDCOMtoJSON(char* fileName);
 char* getIndividualsFromGEDCOM(char* fileName);
 char * createNewGEDCOM(char* JSONstring, char* fileName);
+char* addIndividualToGEDCOM(char* fileName, char* indData );
 //int compareIndividualsLists(const void* first,const void* second);
 //char* printIndividualList(void* toBePrinted);
 //void deleteIndividualList(void * toBeDeleted);

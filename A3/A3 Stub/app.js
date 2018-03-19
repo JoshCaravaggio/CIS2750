@@ -78,7 +78,8 @@ app.get('/uploads/:name', function(req , res){
 let sharedLib = ffi.Library('sharedLib', {
   'GEDCOMtoJSON': [ 'string', ['string' ] ],
   'getIndividualsFromGEDCOM': [ 'string', ['string' ] ],
-  'createNewGEDCOM':['string', ['string','string']]  									
+  'createNewGEDCOM':['string', ['string','string']],  		
+  'addIndividualToGEDCOM':['string', ['string','string']]       							
 });
 
 
@@ -147,11 +148,20 @@ app.get('/createGEDCOM', function(req,res){
 
 app.get('/addIndividual', function(req,res){
 
-  let givenName = req.query.givenName;
-  let surname = req.query.surname;
   let fileName = req.query.fileName;
 
-  let response = sharedLib.addIndividualToGEDCOM(fileName, givenName, surname);
+  let indDataObj = {
+    givenName: req.query.givenName,
+    surname: req.query.surname
+  }
+
+  let indData = JSON.stringify(indDataObj);
+
+  let response = sharedLib.addIndividualToGEDCOM(fileName, indData);
+
+  res.send({
+    response: response
+  });
 
 
 });

@@ -119,6 +119,8 @@ $(document).ready(function(){
             addToStatusPanel("Cannot add individual: atleast one name field must be present.");
 
         }else{
+
+
         $.ajax({
 
             type: 'get',
@@ -132,6 +134,7 @@ $(document).ready(function(){
             success: function(newData){
 
                 response = newData.response;
+                addToStatusPanel("Successfully added " +givenName + " " + surname + " to " + fileName);
 
             }
 
@@ -149,7 +152,8 @@ $(document).on('change', '#GEDViewSelect',function(e){
 
     let select = e.target;
     let fileName = select.value;
-   // / console.log(fileName);
+    let gedTable = document.getElementById('gedViewTable');
+    clearTable(gedTable);
 
     $.ajax({
 
@@ -191,7 +195,6 @@ function addIndividualToGedView(individualData, tableRow){
 
     var sexCell = newRow.insertCell(2);
     sexCell.innerHTML = individualData.sex;
-
 
 }
 
@@ -255,5 +258,14 @@ function addToStatusPanel(statusString){
     let newRow   = statusTable.insertRow(rowCount);
     let infoCell = newRow.insertCell(0);
     infoCell.innerHTML = "> " + statusString + "<br>"
+}
+
+function clearTable(table){
+
+    let rowCount = table.rows.length;
+
+    for(i = rowCount-1; i>0; i--){
+        table.deleteRow(i);
+    }
 
 }

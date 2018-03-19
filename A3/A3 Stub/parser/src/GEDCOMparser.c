@@ -3756,7 +3756,29 @@ char * createNewGEDCOM(char* JSONstring, char* fileName){
 	}
 
 }
-char* addIndividualToGEDCOM()
+char* addIndividualToGEDCOM(char* fileName, char* indData ){
+
+
+	char* fileNameCopy = calloc(sizeof(char),120);
+	strcpy(fileNameCopy, "./uploads/");
+	strcat(fileNameCopy, fileName);
+
+	GEDCOMobject * obj = calloc(sizeof(GEDCOMobject), 1);
+	GEDCOMerror error = createGEDCOM(fileNameCopy, &obj);
+	Individual* newInd = JSONtoInd(indData);
+	addIndividual(obj, newInd);
+	char* response = calloc(sizeof(char),60);
+
+	GEDCOMerror writeError = writeGEDCOM(fileNameCopy, obj);
+
+	strcpy(response, printError(writeError));
+	response[strlen(response)-1] = '\0';
+	return response;
+
+
+
+
+}
 /**
 int getFamilySize(Individual* individual){
 
