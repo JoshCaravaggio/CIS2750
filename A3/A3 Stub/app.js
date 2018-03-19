@@ -79,7 +79,9 @@ let sharedLib = ffi.Library('sharedLib', {
   'GEDCOMtoJSON': [ 'string', ['string' ] ],
   'getIndividualsFromGEDCOM': [ 'string', ['string' ] ],
   'createNewGEDCOM':['string', ['string','string']],  		
-  'addIndividualToGEDCOM':['string', ['string','string']]       							
+  'addIndividualToGEDCOM':['string', ['string','string']],  
+  'getDescendantsFromGEDCOM':['string', ['string','string', 'int']],
+  'getAncestorsFromGEDCOM':['string', ['string','string', 'int']]
 });
 
 
@@ -166,7 +168,43 @@ app.get('/addIndividual', function(req,res){
 
 });
 
+app.get('/getDescendants', function(req,res){
 
+  let fileName = req.query.fileName;
+
+  let indDataObj = {
+    givenName: req.query.givenName,
+    surname: req.query.surname
+  }
+  let maxGen = req.query.maxGen;
+  let indData = JSON.stringify(indDataObj);
+  let response = sharedLib.getDescendantsFromGEDCOM(fileName, indData, maxGen);
+
+  res.send({
+    response: response
+  });
+
+
+});
+
+app.get('/getAncestors', function(req,res){
+
+  let fileName = req.query.fileName;
+
+  let indDataObj = {
+    givenName: req.query.givenName,
+    surname: req.query.surname
+  }
+  let maxGen = req.query.maxGen;
+  let indData = JSON.stringify(indDataObj);
+  let response = sharedLib.getAncestorsFromGEDCOM(fileName, indData, maxGen);
+
+  res.send({
+    response: response
+  });
+
+
+});
 
 function getFilesFromServer(){
 

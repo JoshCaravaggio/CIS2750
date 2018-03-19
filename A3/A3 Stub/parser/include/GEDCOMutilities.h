@@ -313,14 +313,15 @@ void recursivelyAddDescendantsN(List *descendantList,List* currentGeneration,  c
 bool isChild(Family* family, const Individual* individual);
 bool isEmpty(List* list);
 void recursivelyAddAncestorsN(List *ancestorList,List * currentGeneration ,const Individual* currentPerson, int counter,int  maxGen);
-
-
 bool listContains(List* list, void* target );
 int testFunc();
 char* GEDCOMtoJSON(char* fileName);
 char* getIndividualsFromGEDCOM(char* fileName);
 char * createNewGEDCOM(char* JSONstring, char* fileName);
 char* addIndividualToGEDCOM(char* fileName, char* indData );
+char* getDescendantsFromGEDCOM(char* fileName, char* indData, int maxGen);
+bool predicateIndCompare(const void* first, const void* second);
+char* getAncestorsFromGEDCOM(char* fileName, char* indData, int maxGen);
 //int compareIndividualsLists(const void* first,const void* second);
 //char* printIndividualList(void* toBePrinted);
 //void deleteIndividualList(void * toBeDeleted);

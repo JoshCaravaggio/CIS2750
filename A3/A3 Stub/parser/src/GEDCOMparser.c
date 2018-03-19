@@ -3776,9 +3776,71 @@ char* addIndividualToGEDCOM(char* fileName, char* indData ){
 	return response;
 
 
+}
+char* getDescendantsFromGEDCOM(char* fileName, char* indData, int maxGen){
 
+	char* fileNameCopy = calloc(sizeof(char),120);
+	strcpy(fileNameCopy, "./uploads/");
+	strcat(fileNameCopy, fileName);
+
+	GEDCOMobject * obj = calloc(sizeof(GEDCOMobject), 1);
+	GEDCOMerror error = createGEDCOM(fileNameCopy, &obj);
+	Individual* newInd = JSONtoInd(indData);
+	char* response = calloc(sizeof(char),60);
+
+	Individual * indInObj = findPerson(obj, &predicateIndCompare,newInd);
+
+	if(indInObj == NULL){
+		strcpy(response, "IND_NOT_FOUND");
+		return response;
+	}
+
+	List  generationList = getDescendantListN(obj, indInObj, maxGen);
+	char * gListJSON = gListToJSON(generationList);
+	int responseLength = strlen(gListJSON);
+	response = realloc(response, sizeof(char) * (responseLength+30));
+	strcpy(response,gListJSON);
+	return response;
 
 }
+
+char* getAncestorsFromGEDCOM(char* fileName, char* indData, int maxGen){
+
+	char* fileNameCopy = calloc(sizeof(char),120);
+	strcpy(fileNameCopy, "./uploads/");
+	strcat(fileNameCopy, fileName);
+
+	GEDCOMobject * obj = calloc(sizeof(GEDCOMobject), 1);
+	GEDCOMerror error = createGEDCOM(fileNameCopy, &obj);
+	Individual* newInd = JSONtoInd(indData);
+	char* response = calloc(sizeof(char),60);
+
+	Individual * indInObj = findPerson(obj, &predicateIndCompare,newInd);
+
+	if(indInObj == NULL){
+		strcpy(response, "IND_NOT_FOUND");
+		return response;
+	}
+
+	List  generationList = getAncestorListN(obj, indInObj, maxGen);
+	char * gListJSON = gListToJSON(generationList);
+	int responseLength = strlen(gListJSON);
+	response = realloc(response, sizeof(char) * (responseLength+30));
+	strcpy(response,gListJSON);
+	return response;
+
+}
+
+bool predicateIndCompare(const void* first, const void* second){
+
+	if(compareIndividuals(first,second)==0){
+		return true;
+	}else{
+		return false;
+	}
+
+}
+
 /**
 int getFamilySize(Individual* individual){
 

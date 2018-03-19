@@ -143,7 +143,131 @@ $(document).ready(function(){
         }
 
 
-    });    
+    });
+
+    $('#getDescendants').click(function(){
+
+        let getDesForm = document.getElementById('getDescendantsForm');
+        let givenName = getDesForm.givenName.value;
+        let surname = getDesForm.surname.value;        
+        let maxGen = getDesForm.maxGen.value;   
+        let fileName = getDesForm.getDesFileSelect.value;
+
+        if(givenName == "" && surname == ""){
+            addToStatusPanel("Cannot get descendants: atleast one name field must be present.");
+
+        }else if(!(Number.isInteger(eval(maxGen))) || (eval(maxGen) <0)){
+
+            if(!(Number.isInteger(maxGen))){
+                addToStatusPanel("Cannot get descendants: entered value is non-numeric or negative: " + maxGen);
+            }else{
+
+                addToStatusPanel("Cannot get descendants: Number of generations must be greater than or equal to 0.");
+            }
+        }else{
+
+        $.ajax({
+
+            type: 'get',
+            dataType: 'json',
+            url: '/getDescendants',
+            data: {
+                givenName: givenName,
+                surname: surname,
+                fileName: fileName,
+                maxGen: maxGen               
+            },
+            success: function(newData){
+
+                response = newData.response;
+
+                if(response == "IND_NOT_FOUND"){
+
+                    addToStatusPanel(givenName + " " + surname + " was not found in file " + fileName);
+
+                }else{
+
+                    let descendantsTable = document.getElementById('getDesTable');
+                    let rowCount = descendantsTable.rows.length;
+                    clearTable(descendantsTable);
+                    addToStatusPanel("Successfully retrieved " + maxGen + " generation(s) of " + givenName + " " + surname + "'s descendants");
+                    let generationList = JSON.parse(response);
+
+                    for(var i in generationList){
+                        addGenerationToTable(descendantsTable,eval(rowCount) + eval(i), generationList[i]);
+
+                    }
+                }
+            }
+
+        });
+
+        }
+
+
+    });     
+
+    $('#getAncestors').click(function(){
+
+        let getAnsForm = document.getElementById('getAncestorsForm');
+        let givenName = getAnsForm.givenName.value;
+        let surname = getAnsForm.surname.value;        
+        let maxGen = getAnsForm.maxGen.value;   
+        let fileName = getAnsForm.getAnsFileSelect.value;
+
+        if(givenName == "" && surname == ""){
+            addToStatusPanel("Cannot get ancestors: atleast one name field must be present.");
+
+        }else if(!(Number.isInteger(eval(maxGen))) || (eval(maxGen) <0)){
+
+            if(!(Number.isInteger(maxGen))){
+                addToStatusPanel("Cannot get ancestors: entered value is non-numeric or negative: " + maxGen);
+            }else{
+
+                addToStatusPanel("Cannot get ancestors: Number of generations must be greater than or equal to 0.");
+            }
+        }else{
+
+        $.ajax({
+
+            type: 'get',
+            dataType: 'json',
+            url: '/getAncestors',
+            data: {
+                givenName: givenName,
+                surname: surname,
+                fileName: fileName,
+                maxGen: maxGen               
+            },
+            success: function(newData){
+
+                response = newData.response;
+
+                if(response == "IND_NOT_FOUND"){
+
+                    addToStatusPanel(givenName + " " + surname + " was not found in file " + fileName);
+
+                }else{
+
+                    let ancestorsTable = document.getElementById('getAnsTable');
+                    let rowCount = ancestorsTable.rows.length;
+                    clearTable(ancestorsTable);
+                    addToStatusPanel("Successfully retrieved " + maxGen + " generation(s) of " + givenName + " " + surname + "'s descendants");
+                    let generationList = JSON.parse(response);
+
+                    for(var i in generationList){
+                        addGenerationToTable(ancestorsTable,eval(rowCount) + eval(i), generationList[i]);
+
+                    }
+                }
+            }
+
+        });
+
+        }
+
+
+    });             
 
 });
 
@@ -254,10 +378,12 @@ function addFileToSelect(file){
 function addToStatusPanel(statusString){
 
     let statusTable = document.getElementById("statusTable");
+    let statusScroll= document.getElementById("statusScrollPanel");
     let rowCount = statusTable.rows.length;
     let newRow   = statusTable.insertRow(rowCount);
     let infoCell = newRow.insertCell(0);
     infoCell.innerHTML = "> " + statusString + "<br>"
+    statusScroll.scrollTop = statusScroll.scrollHeight;    
 }
 
 function clearTable(table){
@@ -267,5 +393,20 @@ function clearTable(table){
     for(i = rowCount-1; i>0; i--){
         table.deleteRow(i);
     }
+
+}
+function addGenerationToTable(descendantsTable, row, generationList){
+
+    genNum = eval(row) + eval(1);
+    let newRow   = descendantsTable.insertRow(row);
+    let genCell = newRow.insertCell(0);
+    genCell.innerHTML = "<b>Generation " + genNum +"</b>:"
+    for(var i in generationList){
+        genCell.innerHTML = genCell.innerHTML +" " + generationList[i].givenName + " " + generationList[i].surname;
+        if((eval(generationList.length) - eval(i))>1){
+            genCell.innerHTML = genCell.innerHTML +",";
+
+        }
+    }     
 
 }

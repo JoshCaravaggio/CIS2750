@@ -20,10 +20,12 @@ a:link:hover {
     cursor: pointer;
     cursor: hand;
 }
+
 input[type=submit], button {
     cursor: pointer;
     cursor: hand;
 }
+
 @media(max-width: 900px) {
     html {
         font-size: 14px !important;

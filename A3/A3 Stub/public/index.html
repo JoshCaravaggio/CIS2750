@@ -32,7 +32,7 @@
         <div class="panel-heading">
             Status
         </div>    
-        <div class="panel-body" style= "white-space: nowrap;display:inline-block; min-height: 120px;max-height: 120px; overflow-y: scroll;width:100%; overflow-x: scroll;">
+        <div  id = "statusScrollPanel" class="panel-body" style= "white-space: nowrap;display:inline-block; min-height: 120px;max-height: 120px; overflow-y: scroll;width:100%; overflow-x: scroll;">
         <table id = "statusTable">
           <tr>
             <td id = "statusCell">
@@ -105,16 +105,14 @@
     </div>  
   </div>
 </div>
-
-<ul class="nav nav-pills center-pills" style = "text-align: center" >
-  <li><a data-toggle="pill" href="#upload">Upload GEDCOM</a></li>
-  <li><a data-toggle="pill" href="#create">Create GEDCOM</a></li>
-  <li><a data-toggle="pill" href="#addInd">Add Individual</a></li>
-  <li><a data-toggle="pill" href="#getDes">Get Descendants</a></li>
-  <li><a data-toggle="pill" href="#getAns">Get Ancestors</a></li>
-</ul>
-
-<div class="tab-content"  style=" white-space: nowrap;display:inline-block; min-height: 200px;max-height: 200px;width:100%">
+  <ul  class="nav nav-pills center-pills" style="white-space: nowrap; display:inline-block; text-align: center; width:100%;" >
+    <li><a data-toggle="pill" href="#upload">Upload GEDCOM</a></li>
+    <li><a data-toggle="pill" href="#create">Create GEDCOM</a></li>
+    <li><a data-toggle="pill" href="#addInd">Add Individual</a></li>
+    <li><a data-toggle="pill" href="#getDes">Get Descendants</a></li>
+    <li><a data-toggle="pill" href="#getAns">Get Ancestors</a></li>
+  </ul>
+<div align = "center" class="tab-content"  style=" white-space: nowrap;display:inline; min-height: 200px;max-height: 200px;width:100%">
 
   <div id="upload" class="tab-pane fade in active">
     <h3>Upload GEDCOM</h3>
@@ -262,7 +260,7 @@
         <br><br>      
 
         <div class = "col-sm-12">
-          <table class="table"  id = "getDesTable">
+          <table class="table"  id = "getAnsTable">
 
           </table>        
         </div>            
