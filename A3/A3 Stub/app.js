@@ -40,12 +40,16 @@ app.get('/index.js',function(req,res){
 
 //Respond to POST requests that upload files to uploads/ directory
 app.post('/upload', function(req, res) {
-  if(!req.files) {
-    return res.status(400).send('No files were uploaded.');
-  }
- 
+
   let uploadFile = req.files.uploadFile;
- 
+  
+  if(!req.files  || uploadFile == undefined) {
+
+    res.redirect('/'); 
+    return res.status(400).send('No file was uploaded.'); 
+  }
+
+  console.log(uploadFile.name);
   // Use the mv() method to place the file somewhere on your server
   uploadFile.mv('uploads/' + uploadFile.name, function(err) {
     if(err) {
@@ -54,6 +58,7 @@ app.post('/upload', function(req, res) {
 
     res.redirect('/');
   });
+
 });
 
 //Respond to GET requests for files in the uploads/ directory
@@ -70,12 +75,124 @@ app.get('/uploads/:name', function(req , res){
 
 //******************** Your code goes here ******************** 
 
-//Sample endpoint
-app.get('/someendpoint', function(req , res){
-  res.send({
-    foo: "bar"
-  });
+let sharedLib = ffi.Library('sharedLib', {
+  'GEDCOMtoJSON': [ 'string', ['string' ] ],
+  'getIndividualsFromGEDCOM': [ 'string', ['string' ] ],
+  'createNewGEDCOM':['string', ['string','string']]  									
 });
 
+
+
+
+app.get('/getFiles', function(req,res){
+
+  let files = getFilesFromServer();
+  res.send({
+    blah: files
+  });
+
+
+
+});
+
+app.get('/getFileInfo', function(req,res){
+
+	let fileName = req.query.fileName;
+	let GEDCOMobject = sharedLib.GEDCOMtoJSON(fileName);
+
+	res.send({
+		fileInfo: GEDCOMobject
+	});
+
+});
+
+app.get('/gedView', function(req,res){
+
+	let fileName =req.query.fileName;
+  let data = sharedLib.getIndividualsFromGEDCOM(fileName);
+
+  res.send({
+    data: data
+  });
+
+
+});
+
+app.get('/createGEDCOM', function(req,res){
+
+  let newGEDCOM = req.query.newGEDCOM;
+  let newGEDCOMFileName = req.query.fileName;
+  let fileExt = newGEDCOMFileName.split('.').pop();
+
+  let response = "";
+  let GEDCOMobject = {};
+
+  if(fileExt == "ged" && isUniqueFile(newGEDCOMFileName)==true){
+
+    response = sharedLib.createNewGEDCOM(newGEDCOM, newGEDCOMFileName);
+    GEDCOMobject = sharedLib.GEDCOMtoJSON(newGEDCOMFileName);
+
+
+  }else{
+    response = "writeStatus: filename is invalid or file already exists on the server";
+  }
+
+  res.send({
+    response: response,
+    GEDCOMobject: GEDCOMobject
+  });
+
+
+});
+
+app.get('/addIndividual', function(req,res){
+
+  let givenName = req.query.givenName;
+  let surname = req.query.surname;
+  let fileName = req.query.fileName;
+
+  let response = sharedLib.addIndividualToGEDCOM(fileName, givenName, surname);
+
+
+});
+
+
+
+function getFilesFromServer(){
+
+  let files = fs.readdirSync('./uploads/');
+  let filteredFiles = filterFiles(files);
+  return filteredFiles;
+}
+
+function isUniqueFile(fileName){
+
+  let files = getFilesFromServer();
+
+  for(var i in files){
+
+    if(fileName == files[i]){
+      return false;
+    }
+
+  } 
+  return true;
+
+}
+
+function filterFiles(files){
+  let filteredFiles = [];
+  for (var i in files) {
+
+    let fileExt = files[i].split('.').pop();
+
+    if(fileExt == 'ged'){
+      filteredFiles.push(files[i]);
+    }     
+
+  }
+  return filteredFiles;
+
+}
 app.listen(portNum);
 console.log('Running app at localhost: ' + portNum);

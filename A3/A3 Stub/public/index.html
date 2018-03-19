@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style = "width:100%;>
 <head>
-    <title>Bootstrap Test</title>
+    <title>GEDCOM Parser</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Bootstrap Test">
@@ -17,18 +17,279 @@
 
     <!-- Custom CSS End -->
 </head>
-<body>
-<div class = "container">
+    <title>Online GEDCOM Parser</title>
 
+</head><body>
 
+    <h1 align="center">GEDCOM Parser</h1>   
+    <h5 align = "center">Geanealogical Data Tool</h5>
+    <h6 align = "center">Joshua Caravaggio - CI2750 W18</h6>
+
+    
+<div class="row">
+  <div class="col-12">  
+    <div class="panel panel-default" >
+        <div class="panel-heading">
+            Status
+        </div>    
+        <div class="panel-body" style= "white-space: nowrap;display:inline-block; min-height: 120px;max-height: 120px; overflow-y: scroll;width:100%; overflow-x: scroll;">
+        <table id = "statusTable">
+          <tr>
+            <td id = "statusCell">
+            </td>
+
+          </tr>
+
+        </table>
+                                                       
+        </div>
+    </div>  
+  </div>
 
 </div>
-    
+<div class="row">
+  <div class="col-6">  
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            File Log
+        </div>    
+        <div class="panel-body" style="white-space: nowrap;display:inline-block; min-height: 200px;max-height: 200px; overflow-y: scroll;  width:100%;overflow-x: scroll;">
+          <table class="table" id = "fileLogTable">
+            <thead>
+              <tr>
+                <th class = "col-md-4">File Name<br>(Click to download) </th>
+                <th class = "col-md-2">Source</th>
+                <th class = "col-md-1">GEDCOM<br> Version</th>
+                <th class = "col-md-1">Encoding</th>  
+                <th class = "col-md-1">Submitter<br>Name</th>
+                <th class = "col-md-1">Submitter<br> Address</th>
+                <th class = "col-md-1">Number <br>of Individuals</th>
+                <th class = "col-md-1">Number <br>of Families</th>                                               
+              </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+          </table>               
+        </div>
+    </div>  
+  </div>
+  <div class="col-6">  
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            GEDCOM View
+        </div>    
+        <div class="panel-body" style=" white-space: nowrap;display:inline-block; min-height: 200px;max-height: 200px; overflow-y: scroll;  width:100%;overflow-x: scroll;">
+        <form id = "GEDViewSelect">
+          <select class="form-control" id="gedViewFileSelect"></select>
+          <br>
+
+        </form>
+
+          <table class="table"  id = "gedViewTable">
+            <thead>
+              <tr>
+                <th class = "col-md-4">Given Name</th>
+                <th class = "col-md-4">Surname</th>
+                <th class = "col-md-2">Sex</th>
+                <th class = "col-md-2">Family Size</th>                                
+              </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+          </table>           
+
+
+        </div>
+    </div>  
+  </div>
+</div>
+
 <div class="container">
 
+  <ul class="nav nav-pills center-pills" style = "text-align: center" >
+    <li><a data-toggle="pill" href="#upload">Upload GEDCOM</a></li>
+    <li><a data-toggle="pill" href="#create">Create GEDCOM</a></li>
+    <li><a data-toggle="pill" href="#addInd">Add Individual</a></li>
+    <li><a data-toggle="pill" href="#getDec">Get Descendants</a></li>
+    <li><a data-toggle="pill" href="#getAns">Get Ancestors</a></li>
+  </ul>
 
-</div>    <!-- Leave me at the bottom of body -->
-    <script src="/index.js"></script>
+  <div class="tab-content"  style=" white-space: nowrap;display:inline-block; min-height: 200px;max-height: 200px;width:100%">
+    <div = id="upload" class="tab-pane fade in active">
+      <h3>Upload GEDCOM</h3>
+      <br>
+      <p>Select the file you'd wish to upload and click the submit button</p> 
+      <br> 
+
+      <form ref = "uploadForm" id="uploadForm" action = "/upload" method = "POST"
+      encType = "multipart/form-data" class = "createFormF">
+
+        <input name="uploadFile" type="file"  />
+        <br> 
+        <br> 
+        <input type="submit" name ="uploadSubmit">
+        <br> 
+        <br> 
+        <br> 
+        <br>                 
+      </form>
+    </div>
+
+    <div id="create" class="tab-pane fade">
+      <h3>Create GEDCOM</h3>
+      <form id = "createGEDCOMForm">
+
+        <br> 
+        <br> 
+        <div class="form-group">
+          <label class="control-label col-sm-3" >File Name:</label>
+          <div class="col-sm-9">      
+            <input type = "text" class="form-control" id="createFileName" placeholder="Enter file name">
+          </div>
+          <label class="control-label col-sm-3" >Encoding:</label>
+          <div class="col-sm-9">         
+            <input type = "text" class="form-control" id="createEncoding" value="ASCII" readonly>
+          </div>
+          <label  class="control-label col-sm-3">GEDCOM Version:</label>
+          <div class="col-sm-9">         
+            <input type = "text" class="form-control" id="createGedcVersion" value = "5.5" readonly>
+          </div>          
+          <label class="control-label col-sm-3" >Submitter Name:</label>
+          <div class="col-sm-9">
+          <input type = "text" class="form-control" id="createSubName" placeholder="Enter submitter name" >
+          </div>        
+          <label class="control-label col-sm-3" >Submitter Address:</label>
+          <div class="col-sm-9">
+            <input type = "text" class="form-control" id="createSubAddr" placeholder="Enter submitter address" >
+          </div>
+        <div class="col-sm-10">
+        <br>
+        <button type="button" id = "createGEDCOM" name = "createGEDCOM">Create GEDCOM</button>   
+        <br><br>
+        </div> 
+
+        </div>                
+      </form>   
+    </div>      
+   <div id="addInd" class="tab-pane fade">
+      <h3>Add Individual</h3>
+      <form id ="addIndividualForm">
+
+        <br><br>
+        <div class="form-group">
+          <label for="sel1">Select File:</label>
+          <select class="form-control" id="addIndFileSelect">
+
+
+          </select>
+        </div>
+        <br> 
+        <br> 
+        <div class="form-group">
+          <label class="control-label col-sm-2" >Given Name:</label>
+          <div class="col-sm-10">
+            <input type = "text" class="form-control" id="givenName" placeholder="Enter given name" name="email">
+          </div>
+
+
+          <label class="control-label col-sm-2" >Surname</label>
+          <div class="col-sm-10">
+            <input type = "text" class="form-control" id="surname" placeholder="Enter surname" name="surname">
+          </div>
+                                      
+        </div>      
+        <br> 
+        <br>                         
+      </form>
+      <br>
+      <button type="button" id = "addIndividual" name = "addIndividual">Add Individual</button>   
+      <br><br>
+      </div> 
+      
+    </div>
+     <div id="getDec" class="tab-pane fade">
+      <h3>Get Descendants</h3>
+       <form class = "form-horizontal"action="/getDes">
+
+            <br><br>
+            <div class="form-group">
+              <label for="sel1">Select File:</label>
+              <select class="form-control" id="getDesFileSelect">
+
+              </select>
+            </div>
+            <br> 
+            <br> 
+            <div class="form-group">
+              <label class="control-label col-sm-2" >Given Name:</label>
+              <div class="col-sm-10">
+                <input type = "text" class="form-control" id="givenName" placeholder="Enter given name" name="email">
+              </div>
+
+
+              <label class="control-label col-sm-2" >Surname</label>
+              <div class="col-sm-10">
+                <input type = "text" class="form-control" id="surname" placeholder="Enter surname" name="surname">
+              </div>
+
+              <label class="control-label col-sm-2" >Number of <br> Generations</label>
+              <div class="col-sm-10">
+                <input type = "text" class="form-control" id="maxGen" placeholder="Enter an integer" name="maxGen">
+              </div>       
+            </div>      
+            <br> 
+            <br>         
+            <input type="submit" value="Get Descendants">
+            <br> 
+            <br> 
+                    
+          </form>
+    </div>
+     <div id="getAns" class="tab-pane fade">
+      <h3>Get Ancestors</h3>
+   <form class = "form-horizontal"action="/getAns">
+
+            <br><br>
+            <div class="form-group">
+              <label for="sel1">Select File:</label>
+              <select class="form-control" id="getAnsFileSelect">
+
+              </select>
+            </div>
+            <br> 
+            <br> 
+            <div class="form-group">
+              <label class="control-label col-sm-2" >Given Name:</label>
+              <div class="col-sm-10">
+                <input type = "text" class="form-control" id="givenName" placeholder="Enter given name" name="email">
+              </div>
+
+
+              <label class="control-label col-sm-2" >Surname</label>
+              <div class="col-sm-10">
+                <input type = "text" class="form-control" id="surname" placeholder="Enter surname" name="surname">
+              </div>
+
+              <label class="control-label col-sm-2" >Number of Generations</label>
+              <div class="col-sm-10">
+                <input type = "text" class="form-control" id="maxGen" placeholder="Enter an integer" name="maxGen">
+              </div>       
+
+            </div>      
+            <br> 
+            <br>         
+            <input type="submit" value="Get Ancestors">
+            <br> 
+            <br> 
+                    
+          </form>
+    </div>         
+  </div>
+</div>
+
+<script src="/index.js"></script>
 </body>
 </html>
 
