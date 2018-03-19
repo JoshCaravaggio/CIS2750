@@ -177,8 +177,10 @@ app.get('/getDescendants', function(req,res){
     surname: req.query.surname
   }
   let maxGen = req.query.maxGen;
+  console.log(maxGen);
   let indData = JSON.stringify(indDataObj);
   let response = sharedLib.getDescendantsFromGEDCOM(fileName, indData, maxGen);
+  console.log(response);
 
   res.send({
     response: response
@@ -195,9 +197,12 @@ app.get('/getAncestors', function(req,res){
     givenName: req.query.givenName,
     surname: req.query.surname
   }
+
   let maxGen = req.query.maxGen;
   let indData = JSON.stringify(indDataObj);
+  console.log(maxGen);
   let response = sharedLib.getAncestorsFromGEDCOM(fileName, indData, maxGen);
+  console.log(response);
 
   res.send({
     response: response

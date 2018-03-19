@@ -190,11 +190,18 @@ $(document).ready(function(){
                     let descendantsTable = document.getElementById('getDesTable');
                     let rowCount = descendantsTable.rows.length;
                     clearTable(descendantsTable);
-                    addToStatusPanel("Successfully retrieved " + maxGen + " generation(s) of " + givenName + " " + surname + "'s descendants");
+                    if(maxGen == 0){
+                        addToStatusPanel("Successfully retrieved all generations of " + givenName + " " + surname + "'s descendants");
+
+                    }else{
+                        addToStatusPanel("Successfully retrieved " + maxGen + " generation(s) of " + givenName + " " + surname + "'s descendants");
+                    }
                     let generationList = JSON.parse(response);
+        
 
                     for(var i in generationList){
-                        addGenerationToTable(descendantsTable,eval(rowCount) + eval(i), generationList[i]);
+              
+                        addGenerationToTable(descendantsTable,i, generationList[i]);
 
                     }
                 }
@@ -252,11 +259,16 @@ $(document).ready(function(){
                     let ancestorsTable = document.getElementById('getAnsTable');
                     let rowCount = ancestorsTable.rows.length;
                     clearTable(ancestorsTable);
-                    addToStatusPanel("Successfully retrieved " + maxGen + " generation(s) of " + givenName + " " + surname + "'s descendants");
+                    if(maxGen == 0){
+                        addToStatusPanel("Successfully retrieved all generations of " + givenName + " " + surname + "'s ancestorss");
+
+                    }else{
+                        addToStatusPanel("Successfully retrieved " + maxGen + " generation(s) of " + givenName + " " + surname + "'s ancestors");
+                    }
                     let generationList = JSON.parse(response);
 
                     for(var i in generationList){
-                        addGenerationToTable(ancestorsTable,eval(rowCount) + eval(i), generationList[i]);
+                        addGenerationToTable(ancestorsTable,i, generationList[i]);
 
                     }
                 }
@@ -390,19 +402,22 @@ function clearTable(table){
 
     let rowCount = table.rows.length;
 
-    for(i = rowCount-1; i>0; i--){
+    for(i = rowCount-1; i>=0; i--){
         table.deleteRow(i);
     }
 
 }
+
 function addGenerationToTable(descendantsTable, row, generationList){
 
-    genNum = eval(row) + eval(1);
+    genNum = eval(row) + eval(1); 
     let newRow   = descendantsTable.insertRow(row);
     let genCell = newRow.insertCell(0);
-    genCell.innerHTML = "<b>Generation " + genNum +"</b>:"
+    genCell.innerHTML = "<b>Generation " + genNum +"</b>:";
+
     for(var i in generationList){
         genCell.innerHTML = genCell.innerHTML +" " + generationList[i].givenName + " " + generationList[i].surname;
+
         if((eval(generationList.length) - eval(i))>1){
             genCell.innerHTML = genCell.innerHTML +",";
 
