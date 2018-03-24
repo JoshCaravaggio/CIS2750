@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en" style = "width:100%;>
+<head>
+    <title>GEDCOM Parser</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Bootstrap Test">
+    <meta name="keywords" content="Bootstrap Test">
+    <meta name="author" content="Bootstrap Test">
+    <!-- Load jquery, bootstrap -->
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel= "stylesheet" href = "/style.css">
+    <!-- Custom CSS End -->
+</head>
+    <title>Online GEDCOM Parser</title>
+
+</head><body>
+
+    <h1 align="center">GEDCOM Parser</h1>   
+    <h5 align = "center">Geanealogical Data Tool</h5>
+    <h6 align = "center">Joshua Caravaggio - CIS2750 W18</h6>
+
+    
+<div class="row">
+  <div class="col-12">  
+    <div class="panel panel-default" >
+        <div class="panel-heading">
+            Status
+        </div>    
+        <div  id = "statusScrollPanel" class="panel-body" style= "white-space: nowrap;display:inline-block; min-height: 120px;max-height: 120px; overflow-y: scroll;width:100%; overflow-x: scroll;">
+        <table id = "statusTable">
+          <tr>
+            <td id = "statusCell">
+            </td>
+
+          </tr>
+
+        </table>
+                                                       
+        </div>
+    </div>  
+  </div>
+
+</div>
+<div class="row">
+  <div class="col-6">  
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            File Log
+        </div>    
+        <div class="panel-body" style="white-space: nowrap;display:inline-block; min-height: 200px;max-height: 200px; overflow-y: scroll;  width:100%;overflow-x: scroll;">
+          <table class="table" id = "fileLogTable">
+            <thead>
+              <tr>
+                <th class = "col-md-4">File Name<br>(Click to download) </th>
+                <th class = "col-md-2">Source</th>
+                <th class = "col-md-1">GEDCOM<br> Version</th>
+                <th class = "col-md-1">Encoding</th>  
+                <th class = "col-md-1">Submitter<br>Name</th>
+                <th class = "col-md-1">Submitter<br> Address</th>
+                <th class = "col-md-1">Number <br>of Individuals</th>
+                <th class = "col-md-1">Number <br>of Families</th>                                               
+              </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+          </table>               
+        </div>
+    </div>  
+  </div>
+  <div class="col-6">  
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            GEDCOM View
+        </div>    
+        <div class="panel-body" style=" white-space: nowrap;display:inline-block; min-height: 200px;max-height: 200px; overflow-y: scroll;  width:100%;overflow-x: scroll;">
+        <form id = "GEDViewSelect">
+          <select class="form-control" id="gedViewFileSelect"></select>
+          <br>
+
+        </form>
+
+          <table class="table"  id = "gedViewTable">
+            <thead>
+              <tr>
+                <th class = "col-md-4">Given Name</th>
+                <th class = "col-md-4">Surname</th>
+                <th class = "col-md-2">Sex</th>
+                <th class = "col-md-2">Family Size</th>                                
+              </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+          </table>           
+
+
+        </div>
+    </div>  
+  </div>
+</div>
+  <ul  class="nav nav-pills nav-justified" style="display:inline-block; text-align : center; width:100%;" >
+    <li><a data-toggle="pill" href="#upload">Upload GEDCOM</a></li>
+    <li><a data-toggle="pill" href="#create">Create GEDCOM</a></li>
+    <li><a data-toggle="pill" href="#addInd">Add Individual</a></li>
+    <li><a data-toggle="pill" href="#getDes">Get Descendants</a></li>
+    <li><a data-toggle="pill" href="#getAns">Get Ancestors</a></li>
+    <li><a data-toggle="pill" href="#getDB">Database Controls</a></li>
+  </ul>
+<div align = "center" class="tab-content"  style=" white-space: nowrap;display:inline;float: center;  min-height: 200px;max-height: 200px;width:100%">
+
+  <div id="upload" class="tab-pane fade in active">
+    <h3>Upload GEDCOM</h3>
+    <br>
+    <p>Select the file you'd wish to upload and click the submit button</p> 
+    <br> 
+    <form ref = "uploadForm" id="uploadForm" action = "/upload" method = "POST"
+    encType = "multipart/form-data" class = "createFormF">
+
+      <input name="uploadFile" type="file"  />
+      <br> 
+      <br> 
+      <input type="submit" name ="uploadSubmit">
+      <br> 
+      <br> 
+      <br> 
+      <br>                 
+    </form>
+  </div>
+
+    <div id="create" class="tab-pane fade">
+      <h3>Create GEDCOM</h3>
+      <form id = "createGEDCOMForm">
+        <br> 
+        <br> 
+        <label class="control-label col-sm-3" >File Name:</label>
+        <div class="col-sm-9">      
+          <input type = "text" class="form-control" id="createFileName" placeholder="Enter file name">
+        </div>
+        <label class="control-label col-sm-3" >Encoding:</label>
+        <div class="col-sm-9">         
+          <input type = "text" class="form-control" id="createEncoding" value="ASCII" readonly>
+        </div>
+        <label  class="control-label col-sm-3">GEDCOM Version:</label>
+        <div class="col-sm-9">         
+          <input type = "text" class="form-control" id="createGedcVersion" value = "5.5" readonly>
+        </div>          
+        <label class="control-label col-sm-3" >Submitter Name:</label>
+        <div class="col-sm-9">
+          <input type = "text" class="form-control" id="createSubName" placeholder="Enter submitter name" >
+        </div>        
+          <label class="control-label col-sm-3" >Submitter Address:</label>
+        <div class="col-sm-9">
+            <input type = "text" class="form-control" id="createSubAddr" placeholder="Enter submitter address" >
+         </div>    
+        <div class="col-sm-10">
+        <br>
+        <button type="button" id = "createGEDCOM" name = "createGEDCOM">Create GEDCOM</button>   
+        <br><br>
+        </div>                
+      </form>   
+    </div>      
+    <div id="addInd" class="tab-pane fade">
+      <h3>Add Individual</h3>
+    
+      <form id ="addIndividualForm">
+        <br><br>
+        <label for="sel1">Select File:</label>
+        <select class="form-control" id="addIndFileSelect"></select>
+        <br> 
+        <br> 
+        <label class="control-label col-sm-2" >Given Name:</label>
+        <div class="col-sm-10">
+          <input type = "text" class="form-control" id="givenName" placeholder="Enter given name" name="email">
+        </div>
+
+
+        <label class="control-label col-sm-2" >Surname</label>
+        <div class="col-sm-10">
+          <input type = "text" class="form-control" id="surname" placeholder="Enter surname" name="surname">
+        </div>     
+        <br> 
+        <br>                         
+      </form>
+      <br><br>
+      <button type="button" id = "addIndividual" name = "addIndividual">Add Individual</button>   
+      <br><br>
+    </div>  
+      
+   <div id="getDes" class="tab-pane fade">
+    <h3>Get Descendants</h3>
+    <form id = "getDescendantsForm">
+      <br><br>
+      <label class = "col-sm-3">Select File:</label>
+      <div class="col-sm-9">          
+        <select class="form-control" id="getDesFileSelect"></select>
+      </div>
+      <br><br> 
+      <label class="control-label col-sm-3" >Given Name:</label>
+      <div class="col-sm-9">
+        <input type = "text" class="form-control" id="givenName" placeholder="Enter given name" name="email">
+      </div>
+
+      <label class="control-label col-sm-3" >Surname</label>
+      <div class="col-sm-9">
+        <input type = "text" class="form-control" id="surname" placeholder="Enter surname" name="surname">
+      </div>
+
+      <label class="control-label col-sm-3" >Number of <br> Generations</label>
+      <div class="col-sm-9">
+        <input type = "text" class="form-control" id="maxGen" placeholder="Enter an integer" name="maxGen">
+      </div>        
+      <br><br>                       
+    </form>  
+    <div class="col-sm-12">     
+    <br><br>
+    <button type="button" id = "getDescendants" name = "getDescendants">Get Descendants</button>
+    <br><br>     
+    </div> 
+    <div class = "col-sm-12">
+      <table class="table"  id = "getDesTable">
+
+      </table>        
+    </div>
+  </div>     
+  <div id="getAns" class="tab-pane fade">
+     <h3>Get Ancestors</h3>
+      <form id = "getAncestorsForm">
+        <br><br>
+        <label class = "col-sm-3">Select File:</label>
+        <div class="col-sm-9">          
+          <select class="form-control" id="getAnsFileSelect"></select>
+        </div>
+        <br><br>
+
+        <label class="col-sm-3" > Given Name: </label>
+        <div class="col-sm-9">
+          <input type = "text" class="form-control" id="givenName" placeholder="Enter given name" >
+        </div>
+        <br><br>        
+        <label class="col-sm-3" >Surname</label>
+        <div class="col-sm-9">
+          <input type = "text" class="form-control" id="surname" placeholder="Enter surname" >
+        </div>
+        <br><br>        
+        <label class="col-sm-3" >Number of Generations</label>
+        <div class="col-sm-9">
+          <input type = "text" class="form-control" id="maxGen" placeholder="Enter an integer">
+        </div>
+        <br><br>                         
+        </form>
+        <div class="col-sm-12">        
+        <br><br>
+        <button type="button" id = "getAncestors" name = "getAncestors">Get Ancestors</button>
+        <br><br>      
+
+        <div class = "col-sm-12">
+          <table class="table"  id = "getAnsTable">
+
+          </table>        
+        </div>            
+      </div>
+    </div>
+  <div id="getDB" class="tab-pane fade">
+     <h3>Database Controls</h3>
+      <form id = "getAncestorsForm">
+                      
+      </form>
+      <br><br>
+      <div class="col-sm-4" style = "text-align: right">        
+        <button type="button" id = "storeFiles" >Store Files</button>                
+      </div>
+      <div class="col-sm-4">        
+        <button type="button" id = "clearFiles" >Clear Files</button>                
+      </div>
+      <div class="col-sm-4" style = "text-align: left">        
+        <button type="button" id = "displayDBStatus" >Display DB Status</button>                
+      </div>
+    <br> <br> 
+    <div class="row">
+      <div class="col-6">  
+        <div class="panel panel-default">
+            <div class="panel-heading ">
+                Query
+            </div>    
+            <div class="panel-body" style="white-space: nowrap; text-align : left; display:inline-block; min-height: 200px;max-height: 200px; overflow-y: scroll;  width:100%;overflow-x: scroll;">
+              <ul  class="nav nav-tabs " style="display:inline-block; width:100%;" >
+                <li><a data-toggle="tab" href="#standardSQL">Standard Query</a></li>
+                <li><a data-toggle="tab" href="#manualSQL">Manual Query</a></li>
+              </ul>
+              <div align = "center" class="tab-content"  style=" white-space: nowrap;text-align : left;display:inline;float: center;  min-height: 200px;max-height: 200px;width:100%">
+
+                <div id="standardSQL" class="tab-pane fade in active">
+                  <h3>Standard Query</h3>
+                  <p>Select the query you'd like to make to the database and fill in any information necessary</p> 
+                  <br> 
+                </div>
+                <div id="manualSQL" class = "tab-pane fade">
+                  <h3>Manual Query</h3>
+                  <p>Enter the query you'd like to make to the database</p> 
+                  <br>
+                 <label class="col-sm-2" >SELECT</label>
+                <div class="col-sm-10">
+                    <input type = "text" class="form-control" id="manualQuery" placeholder="Enter remainder of query" >
+                </div>
+                <br><br>
+                  <button type="button" id = "executeManualQuery" >Execute Query</button>                
+                <br><br>                  
+              </div>                                          
+            </div>
+            </div>
+        </div>  
+      </div>
+      <div class="col-6">  
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                Results
+            </div>    
+            <div class="panel-body" style=" white-space: nowrap;display:inline-block; min-height: 200px;max-height: 200px; overflow-y: scroll;  width:100%;overflow-x: scroll;">
+          <div id = "resultsArea">
+
+          </div>
+                 
+          </div>
+        </div>  
+      </div>
+    </div>
+
+    </div>
+  </div>
+
+<div id="dbCredPopup" class="modal" style = "display: none">
+
+  <div class="modal-content">
+    <h3 style = "text-align: center">Connect to Database</h3>
+    <form id = "dbCredentialForm">
+      <br><br>
+        <label class="col-sm-3" >Username: </label>
+        <div class="col-sm-9">
+          <input type = "text" class="form-control" id="username" placeholder="Enter username" value ="jcarav02" >
+        </div>
+        <br>
+        <label class="col-sm-3" > Password: </label>
+        <div class="col-sm-9">
+          <input type = "text" class="form-control" id="password" placeholder="Enter password" value ="0963420" >
+        </div>
+        <br>
+        <label class="col-sm-3" > Database Name: </label>
+        <div class="col-sm-9">
+          <input type = "text" class="form-control" id="dbName" placeholder="Enter database name" value ="jcarav02" >
+        </div>
+        <br><br>
+
+    </form>
+        <br><br>        
+        <button type="button" id = "connectToDB" name = "connectToDB">Connect</button>   
+    <br><br>
+    <div id = "connectionResponse"></div>
+    <br><br>
+  </div>
+
+</div>
+<script src="/index.js"></script>
+</body>
+</html>
+
+
+
+
+
+
+
