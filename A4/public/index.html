@@ -273,15 +273,18 @@
                       
       </form>
       <br><br>
-      <div class="col-sm-4" style = "text-align: right">        
+      <div class="col-sm-3" style = "text-align: right">        
         <button type="button" id = "storeFiles" >Store Files</button>                
       </div>
-      <div class="col-sm-4">        
+      <div class="col-sm-3">        
         <button type="button" id = "clearFiles" >Clear Files</button>                
       </div>
-      <div class="col-sm-4" style = "text-align: left">        
+      <div class="col-sm-3" style = "text-align: left">        
         <button type="button" id = "displayDBStatus" >Display DB Status</button>                
       </div>
+      <div class="col-sm-3" style = "text-align: left">        
+        <button type="button" id = "DBhelp" >Help</button>                
+      </div>    
     <br> <br> 
     <div class="row">
       <div class="col-6">  
@@ -299,8 +302,64 @@
                 <div id="standardSQL" class="tab-pane fade in active">
                   <h3>Standard Query</h3>
                   <p>Select the query you'd like to make to the database and fill in any information necessary</p> 
-                  <br> 
-                </div>
+                  <br>
+                <ul  class="nav nav-tabs nav-justified " style="display:inline-block; width:100%;" >
+                  <li><a data-toggle="tab" href="#op1">Option 1</a></li>
+                  <li><a data-toggle="tab" href="#op2">Option 2</a></li>
+                  <li><a data-toggle="tab" href="#op3">Option 3</a></li>
+                  <li><a data-toggle="tab" href="#op4">Option 4</a></li>
+                  <li><a data-toggle="tab" href="#op5">Option 5</a></li>                                                      
+                </ul>
+                <div align = "center" class="tab-content"  style=" white-space: nowrap;text-align : left;display:inline;float: center;  min-height: 200px;max-height: 200px;width:100%">
+                    <div id="op1" class="tab-pane fade in active">
+                      <p>Display all Individuals by last name </p>
+                      <button type="button" id = "executeQuery1" >Execute Query</button>                
+                      <br><br>
+                    </div>
+                    <div id="op2" class="tab-pane fade in ">
+                      <p>Display all individuals from a specific file</p>
+                        <select class="form-control" id="option2FileSelect"></select>                      
+                      <br><br>
+                      <button type="button" id = "executeQuery2" >Execute Query</button>                
+                      <br><br>
+
+                    </div>                
+                    <div id="op3" class="tab-pane fade in ">
+                       <p>Display all individuals from a file with specified surname </p>
+                      <label class="col-sm-3" > Surname: </label>
+                      <div class="col-sm-9">
+                        <input type = "text" class="form-control" id="option3Surname" placeholder="Enter surname"  >
+                      </div>                       
+                      <br><br>
+                      <select class="form-control" id="option3FileSelect"></select>  
+                      <br><br>                         
+                      <button type="button" id = "executeQuery3" >Execute Query</button>                
+                      <br><br>
+                    </div>               
+                    <div id="op4" class="tab-pane fade in ">
+                      <p>Find all individuals of a specifed gender in a specific file</p>
+                      <label class="col-sm-3" > Sex: </label>
+                      <div class="col-sm-9">
+                        <input type = "text" class="form-control" id="option4Sex" placeholder="M, F, etc..."  >
+                      </div>                       
+                      <br><br>
+                      <select class="form-control" id="option4FileSelect"></select>  
+                      <br><br>                       
+                      <button type="button" id = "executeQuery4" >Execute Query</button>                
+                      <br><br>
+                    </div>                
+                    <div id="op5" class="tab-pane fade in">  
+                      <p>Display all from submitter with specified name</p>
+                      <label class="col-sm-3" > Submitter Name: </label>
+                      <div class="col-sm-9">
+                        <input type = "text" class="form-control" id="option5Submitter" placeholder="Enter submitter name"  >
+                      </div>                       
+                      <br><br>
+                      <button type="button" id = "executeQuery5" >Execute Query</button>                
+                      <br><br>
+                    </div>                           
+                  </div>
+                </div>  
                 <div id="manualSQL" class = "tab-pane fade">
                   <h3>Manual Query</h3>
                   <p>Enter the query you'd like to make to the database</p> 
@@ -322,7 +381,7 @@
             <div class="panel-heading">
                 Results
             </div>    
-            <div class="panel-body" style=" white-space: nowrap;display:inline-block; min-height: 200px;max-height: 200px; overflow-y: scroll;  width:100%;overflow-x: scroll;">
+            <div id = "dbScrollPanel" class="panel-body" style=" text-align: left;white-space: nowrap;display:inline-block; min-height: 200px;max-height: 200px; overflow-y: scroll;  width:100%;overflow-x: scroll;">
           <div id = "resultsArea">
 
           </div>

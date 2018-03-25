@@ -327,7 +327,7 @@ $(document).ready(function(){
             dataType: 'json',
             url: '/storeFilesToDB',
             success : function(data){
-
+                addDBStatusToResults();   
 
             }            
 
@@ -344,7 +344,7 @@ $(document).ready(function(){
             dataType: 'json',
             url: '/clearFilesFromDB',
             success : function(data){
-
+                addDBStatusToResults();   
 
             }  
 
@@ -353,24 +353,11 @@ $(document).ready(function(){
 
     });  
 
-    $('displayDBStatus').click(function(){
-       
-        $.ajax({
-
-            type: 'get',
-            dataType: 'json',
-            url: '/getDBstatus',
-            success : function(data){
-                console.log(data);
-
-            }  
-
-        });
-
-    });
 
     $('#executeManualQuery').click(function(){
-       
+
+        addToDBResults("----------");
+    
         let query = document.getElementById('manualQuery').value;
         query = "SELECT " + query;
         $.ajax({
@@ -382,12 +369,16 @@ $(document).ready(function(){
                 queryString: query
             },
             success : function(err, data){
-                let response = data.data;
-                if(!response.err){
-                    for(let row in data){
-                        addToDBResults(row);
+             
+                if(!(err.err)){
+                    for(let i in err.data){
+                        addToDBResults(err.data[i]);
 
                     }
+
+                }else{
+
+                    addToDBResults(err.err.code); 
 
                 }                    
 
@@ -396,7 +387,251 @@ $(document).ready(function(){
 
         });
 
-    });         
+    });    
+
+    $('#displayDBStatus').click(function(){
+        addDBStatusToResults();       
+
+    });
+    $('#executeQuery1').click(function(){
+       
+        query = "SELECT * FROM INDIVIDUAL ORDER BY surname";
+        addToDBResults("----------");
+
+        $.ajax({
+
+            type: 'get',
+            dataType: 'json',
+            url: '/stdQuery',
+            data:{
+                queryString: query
+            },
+            success : function(err, data){
+                
+                if(!(err.err)){
+                    for(let i in err.data){
+                        addToDBResults(err.data[i]);
+
+                    }
+
+                }else{
+
+                    addToDBResults(err.err.code); 
+
+                }                    
+
+            }  
+
+
+        });
+
+    });   
+    $('#executeQuery2').click(function(){
+       
+
+        let option = document.getElementById('option2FileSelect');
+        let fileName = option.value;
+        let query = "SELECT * FROM INDIVIDUAL WHERE source_file = (SELECT file_id FROM FILE WHERE file_Name = '" + fileName  + "')";
+        addToDBResults("----------");
+        $.ajax({
+
+            type: 'get',
+            dataType: 'json',
+            url: '/stdQuery',
+            data:{
+                queryString: query
+            },
+            success : function(err, data){
+    
+                if(!(err.err)){
+                    for(let i in err.data){
+                        addToDBResults(err.data[i]);
+
+                    }
+
+                }else{
+
+                    addToDBResults(err.err.code); 
+
+                }                    
+
+            }  
+
+
+        });
+    });
+    $('#executeQuery3').click(function(){
+       
+
+        let option = document.getElementById('option3FileSelect');
+        let surname = document.getElementById('option3Surname').value;        
+        let fileName = option.value;
+        let query = "SELECT * FROM INDIVIDUAL WHERE source_file = (SELECT file_id FROM FILE WHERE file_Name = '" + fileName  + "' AND surname = '" + surname + "')";
+        addToDBResults("----------");
+        $.ajax({
+
+            type: 'get',
+            dataType: 'json',
+            url: '/stdQuery',
+            data:{
+                queryString: query
+            },
+            success : function(err, data){
+     
+                if(!(err.err)){
+                    for(let i in err.data){
+                        addToDBResults(err.data[i]);
+
+                    }
+
+                }else{
+
+                    addToDBResults(err.err.code); 
+
+                }                    
+
+            }  
+
+
+        });
+
+    }); 
+    $('#executeQuery4').click(function(){
+       
+
+        let option = document.getElementById('option4FileSelect');
+        let sex = document.getElementById('option4Sex').value;        
+        let fileName = option.value;
+        let query = "SELECT * FROM INDIVIDUAL WHERE source_file = (SELECT file_id FROM FILE WHERE file_Name = '" + fileName  + "' AND sex = '" + sex + "')";
+        addToDBResults("----------");
+        $.ajax({
+
+            type: 'get',
+            dataType: 'json',
+            url: '/stdQuery',
+            data:{
+                queryString: query
+            },
+            success : function(err, data){
+     
+                if(!(err.err)){
+                    for(let i in err.data){
+                        addToDBResults(err.data[i]);
+
+                    }
+
+                }else{
+
+                    addToDBResults(err.err.code); 
+
+                }                    
+
+            }  
+
+
+        });
+
+    }); 
+
+    $('#executeQuery5').click(function(){
+       
+        let subName = document.getElementById('option5Submitter').value;
+        query = "SELECT * FROM FILE WHERE sub_name = '" + subName + "'";
+        addToDBResults("----------");
+
+        $.ajax({
+
+            type: 'get',
+            dataType: 'json',
+            url: '/stdQuery',
+            data:{
+                queryString: query
+            },
+            success : function(err, data){
+                
+                if(!(err.err)){
+                    for(let i in err.data){
+                        addToDBResults(err.data[i]);
+
+                    }
+
+                }else{
+
+                    addToDBResults(err.err.code); 
+
+                }                    
+
+            }  
+
+
+        });
+
+    });
+    $('#DBhelp').click(function(){
+       
+        query = "DESCRIBE FILE";
+        addToDBResults("----------");
+        addStringToDBResults("FILE information:");
+
+        $.ajax({
+
+            type: 'get',
+            dataType: 'json',
+            url: '/stdQuery',
+            data:{
+                queryString: query
+            },
+            success : function(err, data){
+                //CON
+                if(!(err.err)){
+                    for(let i in err.data){
+                        addToDBResults(err.data[i]);
+
+                    }
+                    query = "DESCRIBE INDIVIDUAL"
+                    addStringToDBResults("INDIVIDUAL information:");
+
+                    $.ajax({
+
+                        type: 'get',
+                        dataType: 'json',
+                        url: '/stdQuery',
+                        data:{
+                            queryString: query
+                        },
+                        success : function(err, data){
+                            //CON
+                            if(!(err.err)){
+                                for(let i in err.data){
+                                    addToDBResults(err.data[i]);
+
+                                }
+
+
+                            }else{
+
+                                addToDBResults(err.err.code); 
+
+                            }                    
+
+                        }  
+
+
+                    });
+
+                }else{
+
+                    addToDBResults(err.err.code); 
+
+                }                    
+
+            }  
+
+
+        });
+
+    });      
+
 });
 
 
@@ -435,11 +670,87 @@ $(document).on('change', '#GEDViewSelect',function(e){
     
 });
 
-function addToDBResults(data){
-    
-    let resultArea = document.getElementById("resultsArea").innerHTML;
-    resultArea = resultArea + "<br" + data + "br";
+function addDBStatusToResults(){
 
+    var fileCount;
+    var indCount; 
+    addToDBResults("----------");
+    query = "SELECT COUNT(file_id) FROM FILE";
+
+    $.ajax({
+
+        type: 'get',
+        dataType: 'json',
+        url: '/stdQuery',
+        data:{
+            queryString: query
+        },
+        success : function(err, data){
+
+            if(!(err.err)){
+
+                fileCount = err.data[0]["COUNT(file_id)"];
+                query = "SELECT COUNT(ind_id) FROM INDIVIDUAL";
+              
+                $.ajax({
+
+                    type: 'get',
+                    dataType: 'json',
+                    url: '/stdQuery',
+                    data:{
+                        queryString: query
+                    },
+                    success : function(err, data){
+
+                        if(!(err.err)){
+
+                            indCount= err.data[0]['COUNT(ind_id)'];
+                            addStringToDBResults("Database has " + fileCount + " files and " + indCount + " individuals");    
+
+                        }                  
+
+                    }  
+
+
+                }); 
+
+            }else{
+
+
+            }                  
+
+        }  
+
+
+    });
+
+}
+
+function addStringToDBResults(data){
+
+    document.getElementById("resultsArea").innerHTML += data;
+    document.getElementById("resultsArea").innerHTML += "<br>";
+
+
+}
+function addToDBResults(data){
+
+    var toAdd = "";
+
+    for(var key in data){
+        if(data.hasOwnProperty(key)){
+            var value = data[key];
+            toAdd += value;
+            toAdd += " ";
+
+        }
+
+    }
+    let dbScroll = document.getElementById('dbScrollPanel');
+
+    dbScroll.scrollTop = dbScroll.scrollHeight;   
+    document.getElementById("resultsArea").innerHTML += toAdd;
+    document.getElementById("resultsArea").innerHTML += "<br>";
 }
 function addIndividualToGedView(individualData, tableRow){
 
@@ -508,6 +819,21 @@ function addFileToSelect(file){
     let gedViewOption = document.createElement("option");
     gedViewOption.text = file;
     gedViewFileSelect.add(gedViewOption);
+
+    let option2FileSelect = document.getElementById("option2FileSelect");
+    let option = document.createElement("option");
+    option.text = file;
+    option2FileSelect.add(option);
+
+    let option3FileSelect = document.getElementById("option3FileSelect");
+    option = document.createElement("option");
+    option.text = file;
+    option3FileSelect.add(option);    
+
+    let option4FileSelect = document.getElementById("option4FileSelect");
+    option = document.createElement("option");
+    option.text = file;
+    option4FileSelect.add(option);
 }
 
 function addToStatusPanel(statusString){
@@ -524,9 +850,9 @@ function addToStatusPanel(statusString){
 function clearTable(table, endpoint){
 
     let rowCount = table.rows.length;
-	console.log("Clearing table");
 	
-    for(i = rowCount-2; i>=endpoint; i--){
+	
+    for(i = rowCount-1; i>=endpoint; i--){
         table.deleteRow(i);
     }
 

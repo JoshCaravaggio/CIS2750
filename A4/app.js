@@ -292,12 +292,21 @@ app.get('/clearFilesFromDB', function(req, res){
 
 
     connection.query("DELETE FROM INDIVIDUAL", function(err, rows, fields){
+      connection.query("ALTER TABLE INDIVIDUAL AUTO_INCREMENT = 1", function(err, rows, fields){
 
+
+    
+      });
 
   
     });
     connection.query("DELETE FROM FILE", function(err, rows, fields){
 
+      connection.query("ALTER TABLE FILE AUTO_INCREMENT = 1", function(err, rows, fields){
+
+
+    
+      });
 
     });
   res.send({
@@ -343,11 +352,31 @@ app.get('/manualQuery', function(req,res){
 
 });
 
+app.get('/stdQuery', function(req,res){
+
+  let query = req.query.queryString;
+
+  let response = getQuery(query, function(err, data){
+    if(err){
+      res.send({
+        err: err,
+        data: null
+      });
+    }else{
+      res.send({
+        err: null,
+        data: data
+      });
+
+    }
+  });
+
+});
+
 function getQuery(query, callback){
 
   queryDB(query, function(err, data){
     if(err){
-
       callback(err, null);
     }else{
       callback(null, data);
@@ -481,7 +510,6 @@ function filterFiles(files){
 }
 
 function queryDB(query, callback){
-
 
   connection.query(query, function(err, rows, fields){
 
