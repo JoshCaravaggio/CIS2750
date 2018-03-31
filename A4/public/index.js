@@ -308,7 +308,61 @@ $(document).ready(function(){
                 }else{
 
                     let popupWindow = document.getElementById("dbCredPopup");
-                    popupWindow.style.display = "none";    
+                    popupWindow.style.display = "none";
+                    let query = "create table IF NOT EXISTS FILE(file_id int not null AUTO_INCREMENT, file_Name VARCHAR(60) not null, source VARCHAR(15) not null, version VARCHAR(10) not null, encoding VARCHAR(10) not null, sub_name VARCHAR(62) not null , sub_addr VARCHAR(256),num_individuals INT, num_families INT, PRIMARY KEY(file_id))";
+                    $.ajax({
+
+                        type: 'get',
+                        dataType: 'json',
+                        url: '/manualQuery',
+                        data:{
+                            queryString: query
+                        },
+                        success : function(err, data){
+                         
+                            if(!(err.err)){
+                                for(let i in err.data){
+                                    addToDBResults(err.data[i]);
+
+                                }
+                                query = "create table IF NOT EXISTS INDIVIDUAL ( ind_id int not null AUTO_INCREMENT,  surname VARCHAR(256) not null,  given_name VARCHAR(256) not null, sex VARCHAR(1), fam_size INT ,source_file INT ,primary key(ind_id))";
+                                $.ajax({
+
+                                    type: 'get',
+                                    dataType: 'json',
+                                    url: '/manualQuery',
+                                    data:{
+                                        queryString: query
+                                    },
+                                    success : function(err, data){
+                                     
+                                        if(!(err.err)){
+                                            for(let i in err.data){
+                                                addToDBResults(err.data[i]);
+
+                                            }
+
+                                        }else{
+                                            console.log(err.err);
+                                            addToDBResults(err.err.code); 
+
+                                        }                    
+
+                                    }  
+
+
+                                   }); 
+                            }else{
+                                console.log(err.err);
+                                addToDBResults(err.err.code); 
+
+                            }                    
+
+                        }  
+
+
+                    });
+                       
 
                 }
 

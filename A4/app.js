@@ -230,8 +230,9 @@ app.get('/setConnection', function(req,res){
   });
 
   connection.connect();
-  connection.query("SELECT * FROM INDIVIDUAL", function(err, rows, fields){
+  connection.query("SELECT table_name FROM information_schema.tables", function(err, rows, fields){
     if(err){
+      console.log(err);
       res.send({
         status: "FAIL"
 
@@ -259,22 +260,22 @@ app.get('/storeFilesToDB', function(req,res){
       //console.log("Checking for file " + file);
       isFileInDB(file, function(data){
         //console.log(data);
-        if(data == false){
+      if(data == false){
 
-          //console.log(file + " was not found in the database. Adding");
-          GEDCOMobject = JSON.parse(sharedLib.GEDCOMtoJSON(file));
-          saveFileToDB(GEDCOMobject);
+        //console.log(file + " was not found in the database. Adding");
+        GEDCOMobject = JSON.parse(sharedLib.GEDCOMtoJSON(file));
+        saveFileToDB(GEDCOMobject);
 
-          getFileKey(file ,function(err, data){
+        getFileKey(file ,function(err, data){
 
-            indList = JSON.parse(sharedLib.getIndividualsFromGEDCOM(file));
-            let sourceFileID = data;
+          indList = JSON.parse(sharedLib.getIndividualsFromGEDCOM(file));
+          let sourceFileID = data;
 
-            for(let ind of indList){   
+          for(let ind of indList){   
 
-              saveIndToDB(ind, sourceFileID);
+            saveIndToDB(ind, sourceFileID);
 
-            }
+          }
 
         });
       }
@@ -332,7 +333,7 @@ function checkDBIndividuals(){
 }
 
 app.get('/manualQuery', function(req,res){
-
+  
   let query = req.query.queryString;
 
   let response = getQuery(query, function(err, data){
@@ -451,12 +452,13 @@ function getFileKey(file, callback){
     if(err){
       callback(err, null);
     }else{
+      console.log(rows);
       callback(null, rows[0]['file_id']);
     }     
   });
 
-
 }
+
 function isFileInDB(file, callback){
 
   let query = "SELECT COUNT(file_Name) FROM FILE WHERE file_Name = '" + file + "'";
