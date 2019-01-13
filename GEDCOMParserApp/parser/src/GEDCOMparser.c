@@ -3599,6 +3599,7 @@ bool listContains(List* list, void* target ){
 	return false;
 
 }
+
 bool isEmpty(List* list){
 	if(list == NULL){
 		return true;
@@ -3842,16 +3843,3 @@ bool predicateIndCompare(const void* first, const void* second){
 
 }
 
-/**
-int getFamilySize(Individual* individual){
-
-	for(Node * node = individual->families.head; node!= NULL; node = node->next){
-
-		Family * family = (Family*)(node->data);
-
-
-
-
-	}
-
-}**/

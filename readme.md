@@ -1,13 +1,12 @@
-# GEDCOM Web App
+# GEDCOM Web Application
 ## by Josh Caravaggio for CIS2750 W18
 
-## Overview
+### Overview
 
 Final Course Grade: 87%
-Node.js web application with a C backend for data processing, as well as integration with a 
-MySQL DB for storing genealogical family & individual data
 
-### Purpose
+Node.js web application with a C backend for data processing, as well as integration with a 
+MySQL DB for storing genealogical family & individual data.
 
 GEDCOM is a standard for geneaological data that allows information about families, the individuals
 those families are comprised of, the relationships between them and other information to be held
@@ -15,6 +14,26 @@ in a bytestream or file. Geanealogicaol data standards like GEDCOM are commonly 
 Ancestry.com or other family tree tracing infrastructures, and as such systems capable of processing this
 data are required. 
 
+
+### Functionality
+
+The following command in the GEDCOMParserApp/parser/ directory will build the required libaries for the parser
+
+> make
+
+Nice and simple, right? This will build the object files for the linked list library that is used as well as the parser
+library that I built.
+
+The top level is meant to run as a Node.js application, so you'll need NodeModules in the root directory of the application.
+Once you get your hands on that, a simple
+
+> node app.js
+
+Will start it up. The DB access is limited as it was built to run on our school's linux server DB instance which has since then been altered.
+Nevertheless, you can check out some of the queries we had to implement in the app.js 
+
+
+### Assignment Description
 The application was split into 4 assignments, each pertaining to a different aspect of the completed
 web applcation.
 
@@ -43,5 +62,6 @@ From the UI, users could manipulate files on the server, create new files and lo
 The purpose of the fourth assignment was to integrate the web app with a MySQL database, used for storing individual and family information
 in a remote DB. With this integration, additional functionality was added to the UI allowing users to send custom queries 
 to the DB and returning the results to the UI
+
 
 
