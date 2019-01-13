@@ -5,18 +5,29 @@
 
 Final Course Grade: 87%
 
-Node.js web application with a C backend for data processing, as well as integration with a 
-MySQL DB for storing genealogical family & individual data.
+Node.js web application with a C backend for data processing, as well as integration with a MySQL DB for storing genealogical family & individual data. Easily the most complex/difficult of software I've had to write in my university career, but at the same time the most rewarding by far.
 
 GEDCOM is a standard for geneaological data that allows information about families, the individuals
 those families are comprised of, the relationships between them and other information to be held
 in a bytestream or file. Geanealogicaol data standards like GEDCOM are commonly used in services such as
 Ancestry.com or other family tree tracing infrastructures, and as such systems capable of processing this
-data are required. 
+data are required. You can see some examples of GEDCOM data in the GEDCOMParserApp/uploads directory
 
 
 ### Functionality
 
+The data management part of the system works by using C-based library (/parser/src/GEDCOMparser.c) to read in a specified GEDCOM file and create Individual and Family
+structures in memory. The development of the parser required a whole lot of rigourous memory work, including managing circular references and 
+ensuring all of the memory is freed properly. Hours and hours of segfaults. The parser manages all data in memory, but was capable of interfacing with javascript through a series of data-to-JSON inteferacing functions we had to implement as well.
+
+The web application side of the project was done in Node.js and requests are handled with express. The front end allows users to upload their own GEDCOM format files and then use the parser library to manipulate the data in them and present the Individuals and their familial relationships in an easy-to-follow interface. The parser library is interfaced with through a foreign-function interface library, which is used to retrieve family information in JSON format. 
+
+After the application was developed and joined with the parser, the stack was integrated with a MYSQL DB that was hosted on our school's linux server. The app is designed to throw a popup for DB credentials, which was an easy way of making sure we didn't have credentials in our code. 
+
+Maybe one day I'll go back and document all of the JS and C functions, but as this was the first real piece of software I wrote, my documentation and coding skills were not what they are now and it might take weeks to go back and understand all of the aspects of the modules. Also, some of those functions in the parser are enourmous and I would want to make it a lot more modular before writing actual documentation.
+
+
+## Startup
 The following command in the GEDCOMParserApp/parser/ directory will build the required libaries for the parser
 
 > make
